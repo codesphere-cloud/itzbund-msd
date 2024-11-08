@@ -1,0 +1,28 @@
+{{- if .Values.bestPracticesScanner.autoscaling.enabled }}
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: best-practices-scanner-hpa
+  labels:
+    {{- include "ozgsec.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: best-practices-scanner-deployment
+  minReplicas: {{ .Values.bestPracticesScanner.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.bestPracticesScanner.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.bestPracticesScanner.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: {{ .Values.bestPracticesScanner.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.bestPracticesScanner.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageUtilization: {{ .Values.bestPracticesScanner.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}

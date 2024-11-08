@@ -1,0 +1,39 @@
+/*
+<link rel="preload" href="%PUBLIC_URL%/fonts/WorkSans/BundesSansWebbold-webfont.woff2" as="font" crossorigin="anonymous">
+<link rel="preload" href="%PUBLIC_URL%/fonts/WorkSans/BundesSansWebmedium-webfont.woff2" as="font" crossorigin="anonymous">
+<link rel="preload" href="%PUBLIC_URL%/fonts/WorkSans/BundesSansWebregular-webfont.woff2" as="font" crossorigin="anonymous">
+<link rel="preload" href="%PUBLIC_URL%/fonts/WorkSans/BundesSansWebsemibold-webfont.woff2" as="font" crossorigin="anonymous">
+<link rel="stylesheet" type="text/css" href="%PUBLIC_URL%/fonts/WorkSans/font.css">
+*/
+
+@font-face {
+  font-family: "BundesSans";
+  font-style: normal;
+  font-weight: normal; /*400*/
+  font-display: swap;
+  src: url("./BundesSansWeb-Regular.woff") format("woff");
+}
+
+@font-face {
+  font-family: "BundesSans";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("./BundesSansWeb-Regular.woff") format("woff");
+}
+
+@font-face {
+  font-family: "BundesSans";
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("./BundesSansWeb-Regular.woff") format("woff");
+}
+
+@font-face {
+  font-family: "BundesSans";
+  font-style: normal;
+  font-weight: bold; /*700*/
+  font-display: swap;
+  src: url("./BundesSansWeb-Bold.woff") format("woff");
+}

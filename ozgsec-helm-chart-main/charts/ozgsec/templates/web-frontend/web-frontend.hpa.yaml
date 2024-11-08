@@ -1,0 +1,28 @@
+{{- if .Values.webFrontend.autoscaling.enabled }}
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: web-frontend-hpa
+  labels:
+    {{- include "ozgsec.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: web-frontend-deployment
+  minReplicas: {{ .Values.webFrontend.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.webFrontend.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.webFrontend.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: {{ .Values.webFrontend.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.webFrontend.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageUtilization: {{ .Values.webFrontend.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}

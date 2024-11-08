@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: best-practices-scanner-configmap
+data:
+  config.yaml: |-
+{{ toYaml .Values.bestPracticesScanner.config | nindent 4 }}

@@ -1,0 +1,38 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+stages:
+  - test
+  - deploy
+
+secret-scanning:
+  image: ghcr.io/gitleaks/gitleaks:v8.18.2@sha256:8bd05f793efe84e7bbba36c4e138080b88f6acb77f3865835024eb7bef30c41f
+  stage: test
+  variables:
+    GIT_DEPTH: 1
+  script:
+    - gitleaks -s . detect
+
+# https://gitlab.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-info/-/issues/1
+#license-compliance:
+#  stage: test
+#  image: ruby:3.3.1-alpine3.19@sha256:92047b87f9a122a10b22fba43ad647969a5c1ca43da663abebf5718dce1ab6a0
+#  script:
+#    - gem install license_finder
+#    - apk add --update python3 py3-pip
+#    - cd website
+#    - license_finder --decisions_file ../docs/dependency_decisions.yml --enabled-package-managers pip
+
+pages:
+  stage: deploy
+  image: python:3.12.3-bookworm@sha256:25dee7f137aa44c4962d21346385737eb81954b6f06f519fcc348b67f6483d3c
+  needs: ["secret-scanning"]
+  script:
+    - pip install --upgrade pip && pip install -r website/requirements.txt
+    - mkdocs build -f website/mkdocs.yml
+    - mv website/site public
+  artifacts:
+    paths:
+    - public
+  only:
+  - main

@@ -1,0 +1,197 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model ScanReport {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  ipAddress String?
+  duration  Int
+
+  uri    String
+  target Target @relation(fields: [uri], references: [uri], onDelete: Cascade)
+
+  sut String?
+
+  providesEnglishWebsiteVersion Boolean?
+
+  subResourceIntegrity  Boolean?
+  noMixedContent        Boolean?
+  responsibleDisclosure Boolean?
+  dnsSec                Boolean?
+  caa                   Boolean?
+  ipv6                  Boolean?
+  rpki                  Boolean?
+  http                  Boolean?
+  http308               Boolean?
+  httpRedirectsToHttps  Boolean?
+
+  https                 Boolean?
+  hsts                  Boolean?
+  hstsPreloaded         Boolean?
+  contentSecurityPolicy Boolean?
+  xFrameOptions         Boolean?
+  xssProtection         Boolean?
+  contentTypeOptions    Boolean?
+
+  secureSessionCookies Boolean?
+  tlsv1_2              Boolean?
+  tlsv1_3              Boolean?
+
+  deprecatedTLSDeactivated Boolean?
+  strongKeyExchange        Boolean?
+  strongCipherSuites       Boolean?
+
+  validCertificate         Boolean?
+  strongPrivateKey         Boolean?
+  strongSignatureAlgorithm Boolean?
+
+  matchesHostname         Boolean?
+  notRevoked              Boolean?
+  certificateTransparency Boolean?
+  validCertificateChain   Boolean?
+
+  dane Boolean?
+  dkim Boolean?
+  dmarc Boolean?
+  spf  Boolean?
+  starttls Boolean?
+
+  @@index([createdAt])
+  @@index([uri])
+  @@map("scan_reports")
+}
+
+// the full scan report
+model LastScanDetails {
+  updatedAt DateTime @default(now()) @updatedAt
+  details   Json     @db.JsonB
+  uri       String   @id
+
+  target Target @relation(fields: [uri], references: [uri], onDelete: Cascade)
+
+  @@map("last_scan_details")
+}
+
+model Target {
+  uri      String @id
+  hostname String
+
+  number Int @default(autoincrement())
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  lastScan   BigInt?
+  errorCount Int     @default(0)
+  queued     Boolean @default(false)
+
+
+  scanReports ScanReport[]
+
+  lastScanDetails LastScanDetails?
+
+  collections TargetCollectionRelation[]
+
+  @@index([lastScan])
+  @@index([hostname])
+  @@map("targets")
+}
+
+model User {
+  id   String  @id
+  // role String?
+
+  collections         Collection[] @relation("user_collections")
+  collectionCreations Collection[]
+
+  defaultCollection   Collection @relation("default_collection", fields: [defaultCollectionId], references: [id], onDelete: Cascade)
+  defaultCollectionId Int
+  
+  featureFlags Json @db.JsonB
+
+  @@unique([defaultCollectionId])
+  @@map("users")
+}
+
+model Network {
+  cidr               String  @id
+  prefixLength       Int
+  networkAddress     String
+  startAddressNumber BigInt
+  endAddressNumber   BigInt
+  comment            String?
+
+  @@map("networks")
+}
+
+model Stat {
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  collectionId Int
+
+  time  BigInt
+  value Json
+
+  @@id([collectionId, time])
+  @@map("stats")
+}
+
+model TargetCollectionRelation {
+  target       Target     @relation(fields: [uri], references: [uri], onDelete: Cascade)
+  uri          String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  collectionId Int
+
+  createdAt DateTime @default(now())
+
+  @@id([uri, collectionId])
+  @@map("target_collections")
+}
+
+model Collection {
+  id      Int                        @id @default(autoincrement())
+  title   String
+  targets TargetCollectionRelation[]
+  user    User[]                     @relation("user_collections")
+
+  shareLinks ShareLink[]
+
+  owner   User?   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId String?
+  color   String
+
+  defaultOf User? @relation("default_collection")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now()) @updatedAt
+
+  stats      Stat[]
+
+  @@map("collections")
+}
+
+model ShareLink {
+    collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+    collectionId Int
+
+    secret String @unique
+
+    @@id([collectionId, secret])
+    @@map("share_links")
+}
+
+model Email {
+  email String @id
+
+  @@map("emails")
+}

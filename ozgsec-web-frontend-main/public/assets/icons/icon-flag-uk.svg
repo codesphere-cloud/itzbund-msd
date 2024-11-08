@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="Ebene_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0" y="0" width="184.2" height="133.2" style="enable-background:new 0 0 184.2 133.2" xml:space="preserve">
+  <style>
+    .st0{clip-path:url(#SVGID_00000183246829580963270780000007668260548185330591_)}.st1{clip-path:url(#SVGID_00000119095052667931049240000000118557321621232805_)}.st2{opacity:.35;clip-path:url(#SVGID_00000178184070180244695020000009301784034698065051_);enable-background:new}.st3{clip-path:url(#SVGID_00000154412206920688514520000009764249039672829059_);fill:#0071ad}.st4{clip-path:url(#SVGID_00000066489708694979342410000003380903796224153265_);fill:#f7bb3d}
+  </style>
+  <defs>
+    <path id="SVGID_1_" d="M-17-14h220v150H-17z"/>
+  </defs>
+  <clipPath id="SVGID_00000065076729447496744640000014798121557292758682_">
+    <use xlink:href="#SVGID_1_" style="overflow:visible"/>
+  </clipPath>
+  <g style="clip-path:url(#SVGID_00000065076729447496744640000014798121557292758682_)">
+    <defs>
+      <path id="SVGID_00000019662748888717035500000007670037232664716715_" d="M-17-14h220v150H-17z"/>
+    </defs>
+    <clipPath id="SVGID_00000054262878645741113040000013113141755754400666_">
+      <use xlink:href="#SVGID_00000019662748888717035500000007670037232664716715_" style="overflow:visible"/>
+    </clipPath>
+    <g style="clip-path:url(#SVGID_00000054262878645741113040000013113141755754400666_)">
+      <defs>
+        <path id="SVGID_00000170266912633000774900000016961567355771846318_" d="M1 0h184v135H1z"/>
+      </defs>
+      <clipPath id="SVGID_00000178893365872058414130000004767391220807380405_">
+        <use xlink:href="#SVGID_00000170266912633000774900000016961567355771846318_" style="overflow:visible"/>
+      </clipPath>
+      <path style="opacity:.35;clip-path:url(#SVGID_00000178893365872058414130000004767391220807380405_);enable-background:new" d="M1 0h184v135H1z"/>
+    </g>
+  </g>
+  <g>
+    <defs>
+      <path id="SVGID_00000183218892662434218150000016120706871874708373_" d="M-17-14h220v150H-17z"/>
+    </defs>
+    <clipPath id="SVGID_00000081643000240733748150000007161253362444257965_">
+      <use xlink:href="#SVGID_00000183218892662434218150000016120706871874708373_" style="overflow:visible"/>
+    </clipPath>
+    <path style="clip-path:url(#SVGID_00000081643000240733748150000007161253362444257965_);fill:#0071ad" d="M6 5h173v124H6z"/>
+  </g>
+  <g>
+    <defs>
+      <path id="SVGID_00000066510698777999937100000006520698678317579693_" d="M-17-14h220v150H-17z"/>
+    </defs>
+    <clipPath id="SVGID_00000079462131231628076510000012365345344993231261_">
+      <use xlink:href="#SVGID_00000066510698777999937100000006520698678317579693_" style="overflow:visible"/>
+    </clipPath>
+    <path style="clip-path:url(#SVGID_00000079462131231628076510000012365345344993231261_);fill:#f7bb3d" d="M6 67h173v62H6z"/>
+  </g>
+</svg>

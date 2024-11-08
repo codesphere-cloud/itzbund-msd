@@ -1,0 +1,51 @@
+{
+    "name": "ozgsec-keycloak-theme",
+    "homepage": "https://gitlab.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-keycloak",
+    "version": "2.1.6",
+    "description": "A custom theme for Keycloak",
+    "repository": {
+        "type": "git",
+        "url": "git@gitlab.opencode.de:bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-keycloak.git"
+    },
+    "scripts": {
+        "start": "react-scripts start",
+        "build": "react-scripts build",
+        "keycloak": "npm run build && npx keycloakify",
+        "download-builtin-keycloak-theme": "download-builtin-keycloak-theme 15.0.2"
+    },
+    "author": "",
+    "license": "EUPL-1.2",
+    "keywords": [],
+    "dependencies": {
+        "@emotion/react": "^11.11.4",
+        "keycloakify": "^6.13.0",
+        "react": "18.3.1",
+        "react-dom": "18.3.1",
+        "tailwindcss": "3.4.3"
+    },
+    "devDependencies": {
+        "@types/node": "^20.12.12",
+        "@types/react": "18.3.2",
+        "@types/react-dom": "18.3.0",
+        "react-scripts": "5.0.1",
+        "typescript": "^4.9.5"
+    },
+    "eslintConfig": {
+        "extends": [
+            "react-app",
+            "react-app/jest"
+        ]
+    },
+    "browserslist": {
+        "production": [
+            ">0.2%",
+            "not dead",
+            "not op_mini all"
+        ],
+        "development": [
+            "last 1 chrome version",
+            "last 1 firefox version",
+            "last 1 safari version"
+        ]
+    }
+}

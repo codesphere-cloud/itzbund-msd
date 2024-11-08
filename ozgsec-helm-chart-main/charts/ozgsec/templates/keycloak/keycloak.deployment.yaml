@@ -1,0 +1,126 @@
+{{- if not .Values.webFrontend.features.disableDashboard -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  labels:
+    {{- include "ozgsec.labels" . | nindent 4 }}
+  annotations:
+    checkov.io/skip1: CKV_K8S_35=As not directly under our control, we skip this check
+    checkov.io/skip2: CKV_K8S_23=https://gitlab.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-helm-chart/-/issues/2
+    checkov.io/skip3: CKV_K8S_22=https://gitlab.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-helm-chart/-/issues/2
+    checkov.io/skip4: CKV_K8S_40=https://gitlab.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-helm-chart/-/issues/2
+    checkov.io/skip5: CKV_K8S_20=https://gitlab.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-helm-chart/-/issues/2
+    checkov.io/skip6: CKV_K8S_37=https://gitlab.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-helm-chart/-/issues/2
+spec:
+  replicas: {{ .Values.keycloak.replicaCount }}
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      {{- with .Values.keycloak.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app: keycloak
+    spec:
+      automountServiceAccountToken: false
+      {{- with .Values.keycloak.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: keycloak
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+            capabilities:
+                drop:
+                - NET_RAW
+          image: "{{ .Values.keycloak.image.repository }}:{{ .Values.keycloak.image.tag | default "latest" }}"
+          imagePullPolicy: {{ .Values.keycloak.image.pullPolicy }}
+          args:
+            [
+              "start",
+              "--optimized",
+            ]
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: KC_HOSTNAME_STRICT
+              value: "false"
+            - name: KC_HOSTNAME_STRICT_HTTPS
+              value: "false"
+            - name: KC_PROXY
+              value: edge
+            - name: KC_HOSTNAME_ADMIN_URL
+              value: {{ include "keycloak.hostnameAndProtocol" . }}
+            - name: KC_HOSTNAME
+              value: {{ include "keycloak.hostname" . }}
+            - name: KC_HTTP_ENABLED
+              value: "true"
+            - name: KC_HTTPS_ENABLED
+              value: "false"
+            - name: KC_DB
+              value: "postgres"
+            - name: KC_DB_SCHEMA
+              value: public
+            - name: KC_DB_USERNAME
+              value: "keycloak"
+            - name: KC_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keycloak.config.existingSecret.name | default "keycloak" }}
+                  key: {{ .Values.keycloak.config.existingSecret.dbPassKey | default "db-password" }}
+            - name: KC_DB_URL
+              value: "jdbc:postgresql://{{ .Release.Name }}-postgresql.{{ .Release.Namespace }}.svc.cluster.local:5432/keycloak"
+            - name: KEYCLOAK_ADMIN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keycloak.config.existingSecret.name | default "keycloak" }}
+                  key: {{ .Values.keycloak.config.existingSecret.adminUsernameKey | default "admin-username" }}
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.keycloak.config.existingSecret.name | default "keycloak" }}
+                  key: {{ .Values.keycloak.config.existingSecret.adminPassKey | default "admin-pass" }}
+          readinessProbe:
+            httpGet:
+              scheme: HTTP
+              path: "/health/ready"
+              port: 8080
+            initialDelaySeconds: 80
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              scheme: HTTP
+              path: "/health/live"
+              port: 8080
+            initialDelaySeconds: 80
+          resources:
+            requests:
+                memory: 512Mi
+                cpu: "0.001"
+            limits:
+                memory: 2048Mi
+                cpu: "0.5"
+      {{- with .Values.keycloak.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.keycloak.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.keycloak.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

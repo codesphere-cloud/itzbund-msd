@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="Ebene_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0" y="0" width="184.2" height="133.2" style="enable-background:new 0 0 184.2 133.2" xml:space="preserve">
+  <style>
+    .st0{clip-path:url(#SVGID_00000016073419112262958750000001571095431134251177_)}.st1{clip-path:url(#SVGID_00000109733250413658963550000010548563222335795634_)}.st2{opacity:.35;clip-path:url(#SVGID_00000123423959874823641830000013981537194100413372_);enable-background:new}
+  </style>
+  <defs>
+    <path id="SVGID_1_" d="M-18-14h220v150H-18z"/>
+  </defs>
+  <clipPath id="SVGID_00000021114560702854560470000013500188873492795577_">
+    <use xlink:href="#SVGID_1_" style="overflow:visible"/>
+  </clipPath>
+  <g style="clip-path:url(#SVGID_00000021114560702854560470000013500188873492795577_)">
+    <defs>
+      <path id="SVGID_00000157304212797159300440000006644121688209623426_" d="M-18-14h220v150H-18z"/>
+    </defs>
+    <clipPath id="SVGID_00000075841031614630647320000016316156740456844955_">
+      <use xlink:href="#SVGID_00000157304212797159300440000006644121688209623426_" style="overflow:visible"/>
+    </clipPath>
+    <g style="clip-path:url(#SVGID_00000075841031614630647320000016316156740456844955_)">
+      <defs>
+        <path id="SVGID_00000176738955232218473210000003597746496673386119_" d="M0 0h185v135H0z"/>
+      </defs>
+      <clipPath id="SVGID_00000060714551369149358760000016346914056540467341_">
+        <use xlink:href="#SVGID_00000176738955232218473210000003597746496673386119_" style="overflow:visible"/>
+      </clipPath>
+      <path style="opacity:.35;clip-path:url(#SVGID_00000060714551369149358760000016346914056540467341_);enable-background:new" d="M0 0h185v135H0z"/>
+    </g>
+  </g>
+  <g>
+    <path id="black_stripe_12_" style="fill:#fff" d="M5 5h173v124H5z"/>
+    <path id="red_stripe_12_" style="fill:#0071ad" d="M5 46h173v83H5z"/>
+    <path id="gold_stripe_12_" style="fill:#dd1615" d="M5 88h173v41H5z"/>
+  </g>
+</svg>

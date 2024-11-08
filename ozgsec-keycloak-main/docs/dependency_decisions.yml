@@ -1,0 +1,77 @@
+---
+- - :permit
+  - Apache-2.0
+  - :who: Sebastian Kawelke
+    :why: OSI-approved OSS license, https://dwheeler.com/essays/floss-license-slide.html
+    :when: 2024-05-13 13:45:20.797550000 Z
+- - :permit
+  - New BSD
+  - :who: Sebastian Kawelke
+    :why: OSI-approved OSS license, https://dwheeler.com/essays/floss-license-slide.html
+    :when: 2024-05-13 13:45:20.797550000 Z
+- - :permit
+  - Mozilla Public License 2.0
+  - :who: Sebastian Kawelke
+    :why: OSI-approved OSS license, https://dwheeler.com/essays/floss-license-slide.html
+    :when: 2024-05-13 13:45:20.797550000 Z
+- - :permit
+  - MIT
+  - :who: Sebastian Kawelke
+    :why: OSI-approved OSS license, https://dwheeler.com/essays/floss-license-slide.html
+    :when: 2024-05-13 13:45:20.797550000 Z
+- - :permit
+  - Simplified BSD
+  - :who: Sebastian Kawelke
+    :why: OSI-approved OSS license, The 2-Clause BSD License, permissive, https://dwheeler.com/essays/floss-license-slide.html
+    :when: 2024-05-13 13:45:20.797550000 Z
+- - :permit
+  - ISC
+  - :who: Sebastian Kawelke
+    :why: OSI-approved OSS license, permissive, GPL compatible
+    :when: 2024-05-13 13:45:20.797550000 Z
+- - :permit
+  - 0BSD
+  - :who: Sebastian Kawelke
+    :why: OSI-approved OSS license, permissive, GPL compatible
+    :when: 2024-05-13 13:45:20.797550000 Z
+- - :permit
+  - CC-BY-4.0
+  - :who: Sebastian Kawelke
+    :why:
+    :when: 2024-05-13 13:45:20.797550000 Z
+- - :permit
+  - BlueOak-1.0.0
+  - :who: Sebastian Kawelke
+    :why: permissive, https://blueoakcouncil.org/license-faq#:~:text=Is%20the%20model%20license%20compatible,GPLv3%2C%20LGPLv3%2C%20or%20AGPLv3.
+    :when: 2024-05-13 13:45:20.797550000 Z
+- - :permit
+  - BSD
+  - :who: Sebastian Kawelke
+    :why: permissive
+    :when: 2024-05-13 13:45:20.797550000 Z
+- - :permit
+  - LGPL-3.0-or-later
+  - :who: Sebastian Kawelke
+    :why: OSI-approved OSS license, permissive, GPL compatible
+    :when: 2024-05-13 13:45:20.797550000 Z
+- - :permit
+  - CC0 1.0 Universal
+  - :who: Sebastian Kawelke
+    :why: dedicated to the public domain without any restrictions
+    :when: 2024-05-13 13:45:20.797550000 Z
+- - :approve
+  - argparse
+  - :who:
+    :why: OSI-approved OSS license, permissive
+    :versions: []
+    :when: 2024-05-14 11:57:14.697744000 Z
+- - :permit
+  - EUPL-1.2
+  - :who: Sebastian Kawelke
+    :why: 
+    :when: 2024-05-13 13:45:20.797550000 Z
+- - :permit
+  - Unlicense
+  - :who: Sebastian Kawelke
+    :why: OSI-approved OSS license, permissive, GPL compatible
+    :when: 2024-05-13 13:45:20.797550000 Z

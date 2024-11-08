@@ -1,0 +1,381 @@
+# checkov:skip=CKV_OPENAPI_4:
+# checkov:skip=CKV_OPENAPI_21:
+openapi: 3.0.3
+servers: []
+info:
+  version: 1.0.0
+  title: API Endpunkte
+  contact:
+    name: API Support
+    email: ozgsec@bmi.bund.de
+    url: https://gitlab.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-web-frontend
+  license:
+    name: EUPL-1.2
+    url: "https://eupl.eu/1.2/de/"
+paths:
+  /api/v2/scan:
+    get:
+      summary: Überprüfen einer Webseite
+      description: Überprüft den Umsetzungsgrad von Best Practices und Sicherheitsmaßnahmen einer Webseite. Gibt einen JSON-Report zurück.
+      operationId: scan
+      parameters:
+        - name: site
+          in: query
+          description: Domain der zu überprüfenden Webseite
+          required: true
+          schema:
+            type: string
+        - name: refresh
+          in: query
+          description: Erzwingt einen Scan ohne Cache
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: socks5Proxy
+          in: query
+          description: SOCKS5-Proxy-Server in dem Format <user>:<pass>@<socks-proxy.domain>:<port>
+          required: false
+          schema:
+            type: string
+      responses:
+        "400":
+          description: bad request - Fehlende zu überprüfende Domain oder kein gültiger vollqualifizierter Domainname (fully qualified domain name).
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanReport-V2"
+  /api/v1/health: 
+    get: 
+      summary: Health-Check
+      description: Route für den Health-Check (z. B. für Monitoring-Systeme). Intialisiert die Server-Sent-Events-Verbindung und den Scan-Loop.
+      operationId: health
+      responses: 
+        "200": 
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: 
+                    type: boolean
+                  sseClients: 
+                    type: integer
+                    format: int32
+                    description: Anzahl der verbundenen Clients, die Server-Sent-Events empfangen
+  /api/v1/scan: 
+    get:
+      summary: Überprüfen einer Webseite
+      description: Überprüft den Umsetzungsgrad von Best Practices und Sicherheitsmaßnahmen einer Webseite. Gibt einen JSON-Report zurück.
+      operationId: scan
+      parameters:
+        - name: site
+          in: query
+          description: Domain der zu überprüfenden Webseite
+          required: true
+          schema:
+            type: string
+        - name: refresh
+          in: query
+          description: Erzwingt einen Scan ohne Cache
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: socks5Proxy
+          in: query
+          description: SOCKS5-Proxy-Server in dem Format <user>:<pass>@<socks-proxy.domain>:<port>
+          required: false
+          schema:
+            type: string
+      responses:
+        "400":
+          description: bad request - Fehlende zu überprüfende Domain oder kein gültiger vollqualifizierter Domainname (fully qualified domain name).
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanReport-V1"
+components:
+  # checkov:skip=CKV_OPENAPI_5:
+  securitySchemes: {}
+  schemas:
+    ScanReport-V2:
+      type: object
+      properties:
+        $schema: 
+          type: string
+          description: JSON-Schema-Version - currently SARIF 2.1.0
+        runs: 
+          type: array
+          items: 
+            type: object
+            properties: 
+              invocations: 
+                type: array
+                items: 
+                  type: object
+                  properties: 
+                    endTimeUtc: 
+                      type: string
+                      format: date-time
+                    executionSuccessful: 
+                      type: boolean
+                    exitCode: 
+                      type: integer
+                      format: int32
+                    exitCodeDescription: 
+                      type: string
+                    startTimeUtc: 
+                      type: string
+                      format: date-time
+              properties: 
+                type: object
+                properties: 
+                  ipAddress: 
+                    type: string
+                  sut: 
+                    type: string
+                    description: System under test
+                  target: 
+                    type: string
+                    description: Original users target URL
+              results: 
+                type: array
+                items: 
+                  type: object
+                  properties: 
+                    kind: 
+                      type: string
+                      enum: 
+                        - pass
+                        - fail
+                    message: 
+                      type: object
+                      properties: 
+                        text: 
+                          type: string
+                    properties: 
+                      type: object
+                      properties: 
+                        actualValue: 
+                          type: object
+                          nullable: true
+                          description: 'Der tatsächliche Wert, der vom Tool für den Scan erfasst wurde. Bei dem contentTypeOptions Check z. B.: { "X-Content-Type-Options": "" }'
+                        durationMs: 
+                          type: integer
+                          format: int32
+                        errorIds: 
+                          type: array
+                          items: 
+                            type: string
+                        recommendationIds: 
+                          type: array
+                          items: 
+                            type: string
+                    ruleId: 
+                      type: string
+                    ruleIndex: 
+                      type: integer
+                      format: int32
+              tool: 
+                type: object
+                properties: 
+                  driver: 
+                    type: object
+                    properties: 
+                      name: 
+                        type: string
+                      properties: 
+                        type: object
+                        properties: 
+                          scannerIp: 
+                            type: string
+                            description: IP-Adresse des Scanners (bei der Verwendung eines socks5Proxys wird die IP-Adresse des Proxys zurückgegeben)
+                      rules: 
+                        type: array
+                        items: 
+                          type: object
+                          properties: 
+                            fullDescription: 
+                              type: object
+                              properties: 
+                                text: 
+                                  type: string
+                            id: 
+                              type: string
+                            name: 
+                              type: string
+                      version: 
+                        type: string
+        version: 
+          type: string
+    ScanReport-V1:
+      type: object
+      properties:
+        uri: 
+          type: string
+        hostname: 
+          type: string
+        number: 
+          type: integer
+          format: int32
+        createdAt: 
+          type: string
+          format: date-time
+        updatedAt: 
+          type: string
+          format: date-time
+        lastScan: 
+          type: integer
+          format: int64
+        errorCount: 
+          type: integer
+          format: int32
+        queued: 
+          type: boolean
+        details: 
+          type: object
+          properties: 
+            sut: 
+              type: string
+              description: System under test
+            providesEnglishWebsiteVersion: 
+              type: object
+              properties: 
+                didPass: 
+                  type: boolean
+                errors: 
+                  type: array
+                  items: 
+                    type: string
+                recommendations: 
+                  type: array
+                  items: 
+                    type: string 
+                actualValue: 
+                  type: object
+                  properties: 
+                    propability: 
+                      type: integer
+                      format: int32
+            responsibleDisclosure: 
+              type: object
+              properties: 
+                didPass: 
+                  type: boolean
+                errors: 
+                  type: array
+                  items: 
+                    type: string
+                recommendations: 
+                  type: array
+                  items: 
+                    type: string 
+                actualValue: 
+                  type: object
+            rpki: 
+              type: object
+              properties: 
+                didPass: 
+                  type: boolean
+                errors: 
+                  type: array
+                  items: 
+                    type: string
+                recommendations: 
+                  type: array
+                  items: 
+                    type: string 
+                actualValue: 
+                  type: array
+                  items: 
+                    type: object
+                    properties: 
+                      isValid: 
+                        type: boolean
+                      asn: 
+                        type: integer
+                        format: int32
+                      holder: 
+                        type: string
+                      actual: 
+                        type: string
+                      prefix: 
+                        type: string
+            hsts: 
+              type: object
+              properties: 
+                didPass: 
+                  type: boolean
+                errors: 
+                  type: array
+                  items: 
+                    type: string
+                recommendations: 
+                  type: array
+                  items: 
+                    type: string
+                actualValue: 
+                  type: object
+                  properties: 
+                    Strict-Transport-Security: 
+                      type: string
+            tlsv1_3: 
+              type: object
+              properties: 
+                didPass: 
+                  type: boolean
+                errors: 
+                  type: array
+                  items: 
+                    type: string
+                recommendations: 
+                  type: array
+                  items: 
+                    type: string
+                actualValue: 
+                  type: string
+                  format: nullable
+            deprecatedTLSDeactivated: 
+              type: object
+              properties: 
+                didPass: 
+                  type: boolean
+                errors: 
+                  type: array
+                  items: 
+                    type: string
+                recommendations: 
+                  type: array
+                  items: 
+                    type: string
+                actualValue: 
+                  type: object
+                  properties: 
+                    tlsv1_0Supported: 
+                      type: boolean
+                    tlsv1_1Supported: 
+                      type: boolean
+            dnsSec: 
+              type: object
+              properties: 
+                didPass: 
+                  type: boolean
+                errors: 
+                  type: array
+                  items: 
+                    type: string
+                recommendations: 
+                  type: array
+                  items: 
+                    type: string
+                actualValue: 
+                  type: object
+                  format: nullable
+
+

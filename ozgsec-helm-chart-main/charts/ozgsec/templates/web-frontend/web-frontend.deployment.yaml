@@ -1,0 +1,216 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-frontend-deployment
+  labels:
+    {{- include "ozgsec.labels" . | nindent 4 }}
+  annotations:
+    checkov.io/skip1: CKV_K8S_38=We need the service account to be able to run the leader election
+    checkov.io/skip2: CKV_K8S_35=Currently we stay with the env option, Issue opened - https://gitlab.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-web-frontend/-/issues/1
+    checkov.io/skip3: CKV_K8S_9=Readiness probe present for the application, leader election sidecar is not checked
+    checkov.io/skip4: CKV_K8S_22=Since highly dependent on the application, temporarily ignored - Issue opened - https://gitlab.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-helm-chart/-/issues/1
+    checkov.io/skip5: CKV_K8S_8=Liveness probe present for the application, leader election sidecar is not checked
+spec:
+  {{- if not .Values.webFrontend.autoscaling.enabled }}
+  replicas: {{ .Values.webFrontend.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: web-frontend
+  template:
+    metadata:
+      {{- with .Values.webFrontend.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app: web-frontend
+    spec:
+      automountServiceAccountToken: true
+      serviceAccount: leaderelection-sa
+      {{- with .Values.webFrontend.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+        runAsUser: 53111
+        runAsNonRoot: true
+      initContainers:
+      - name: migrate-db
+        image: "{{ .Values.webFrontend.image.repository }}/initcontainer:{{ .Values.webFrontend.image.tag | default "latest" }}"
+        imagePullPolicy: {{ .Values.webFrontend.image.pullPolicy }}
+        command: ['/usr/app/node_modules/.bin/prisma', 'migrate', 'deploy']
+        env:
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+                name: postgresql-credentials
+                key: database-url
+        resources:
+            requests:
+                memory: 254Mi
+                cpu: "0.001"
+            limits:
+                memory: 2048Mi
+                cpu: "0.5"
+        securityContext:
+            runAsUser: 53111
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+            capabilities:
+                drop:
+                - ALL
+      containers:
+        - name: leader-election-sidecar
+          image: k8s.gcr.io/leader-elector:0.5@sha256:d73a480c2f43093e90634a499921300b8055f616db92f59ad2179276489c8d56
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+            allowPrivilegeEscalation: false
+            runAsUser: 53111
+            runAsNonRoot: true
+            capabilities:
+                drop:
+                - ALL
+          args:
+            - "--election=ozgsec"
+            - "--election-namespace={{ .Release.Namespace }}"
+            - "--http=0.0.0.0:4040"
+          ports:
+            - containerPort: 4040
+          resources:
+            requests:
+              memory: 150Mi
+              cpu: "0.001"
+            limits:
+              memory: 300Mi
+              cpu: "1"
+        - name: web-frontend
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+            allowPrivilegeEscalation: false
+            runAsUser: 53111
+            runAsNonRoot: true
+            capabilities:
+                drop:
+                - ALL
+          image: "{{ .Values.webFrontend.image.repository }}:{{ .Values.webFrontend.image.tag | default "latest" }}"
+          imagePullPolicy: {{ .Values.webFrontend.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 3000
+          env:
+            - name: POSTGRES_USER
+              value: web-frontend
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DATABASE
+              value: web-frontend
+            - name: POSTGRES_HOST
+              value: {{.Release.Name}}-postgresql
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-credentials
+                  key: password
+            - name: RABBITMQ_HOST
+              value: {{.Release.Name}}-rabbitmq
+            - name : RABBITMQ_PORT
+              value: "5672"
+            - name: RABBITMQ_USER
+              value: ozgsec
+            - name: CANONICAL_URL
+              value: {{.Values.webFrontend.canonicalUrl | default "" | quote}}
+            - name: RABBITMQ_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-credentials
+                  key: rabbitmq-password
+            - name: NEXTAUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: web-frontend-credentials
+                  key: nextauth-secret
+            - name: LEADER_ELECTOR_URL
+              value: "http://localhost:4040"
+            - name: NEXTAUTH_URL
+              value: {{ include "webFrontend.hostnameAndProtocol" . }}
+            - name: KEYCLOAK_ISSUER
+              value: {{ include "keycloak.hostnameAndProtocol" . }}/realms/master
+            - name: KEYCLOAK_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: web-frontend-keycloak-secret
+                  key: keycloak-secret
+                  optional: true
+            - name: INFLUX_URL
+              value: http://{{.Release.Name}}-influxdb:8086
+            - name: INFLUX_ORG
+              value: ozgsec
+            - name: INFLUX_BUCKET
+              value: web-frontend
+            - name: INFLUX_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: influxdb-token
+                  key: token
+                  optional: true
+            - name: KEYCLOAK_ID
+              value: web-frontend
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.name
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  apiVersion: v1
+                  fieldPath: metadata.namespace
+            - name: SCAN_INTERVAL_DAYS
+              value: {{.Values.webFrontend.scanInterval | default "7" | quote}}
+            - name: SOCKS5_PROXY
+              value: {{.Values.webFrontend.socks5Proxy | default "" | quote}}
+            - name: NEXT_PUBLIC_REFERENCE_COLLECTIONS
+              value: {{.Values.webFrontend.referenceCollections | default "" | quote}}
+            - name: NEXT_PUBLIC_DISABLE_DASHBOARD
+              value: {{.Values.webFrontend.features.disableDashboard | default "false" | quote}}
+            - name: NEXT_PUBLIC_DISABLE_REFRESH
+              value: {{.Values.webFrontend.features.disableRefresh | default "false" | quote}}
+            - name: LOG_LEVEL
+              value: {{.Values.webFrontend.logLevel | default "info" | quote}}
+          livenessProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            httpGet:
+              path: /api/v1/health
+              port: http
+          readinessProbe:
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            httpGet:
+              path: /api/v1/health
+              port: http
+          resources:
+            limits:
+              cpu: "1" # single threaded
+              memory: 4196Mi
+            requests:
+              cpu: "0.001"
+              memory: 2048Mi
+      {{- with .Values.webFrontend.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.webFrontend.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.webFrontend.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

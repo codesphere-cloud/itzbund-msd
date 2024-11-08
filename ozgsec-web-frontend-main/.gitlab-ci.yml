@@ -1,0 +1,317 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+stages:
+- test
+- tag
+- build
+- container-scanning
+- publish
+- sign
+
+.oci:login:
+  stage: test
+  script:
+  - &oci_login |
+    export VERSION="1.1.0"
+    export ORAS_SHASUM="e09e85323b24ccc8209a1506f142e3d481e6e809018537c6b3db979c891e6ad7"
+    curl -LO "https://github.com/oras-project/oras/releases/download/v${VERSION}/oras_${VERSION}_linux_amd64.tar.gz"
+    echo "${ORAS_SHASUM}  oras_${VERSION}_linux_amd64.tar.gz" | sha256sum -c -
+    mkdir -p oras-install/
+    tar -zxf oras_${VERSION}_*.tar.gz -C oras-install/
+    mv oras-install/oras /usr/local/bin/
+    rm -rf oras_${VERSION}_*.tar.gz oras-install/
+    echo "$CI_JOB_TOKEN" | oras login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+
+
+secret-scanning:
+  image: ghcr.io/gitleaks/gitleaks:v8.18.4@sha256:75bdb2b2f4db213cde0b8295f13a88d6b333091bbfbf3012a4e083d00d31caba
+  stage: test
+  variables:
+    GIT_DEPTH: 1
+  script:
+  - gitleaks -v detect --baseline-path gitleaks-report.json
+
+static-application-security-testing:
+  image: returntocorp/semgrep:1.81.0@sha256:aca826eb1bb9ba9e84a348b88e0c6340ca2a400789de0ee1e41b1abb560e4a1f
+  stage: test
+  script:
+  - semgrep scan --config=p/ci .
+
+software-composition-analysis:
+  image: node:22.5.1-bookworm@sha256:86915971d2ce1548842315fcce7cda0da59319a4dab6b9fc0827e762ef04683a
+  stage: test
+  script:
+  # fail on critical
+  - npm audit --audit-level=critical
+
+jest:
+  image: node:22.5.1-bookworm@sha256:86915971d2ce1548842315fcce7cda0da59319a4dab6b9fc0827e762ef04683a
+  stage: test
+  script:
+  - npm i --force --include=dev
+  - "npx jest --ci --reporters=default --reporters=jest-junit"
+  artifacts:
+    when: always
+    reports:
+      junit:
+      - junit.xml
+
+license-compliance:
+  stage: test
+  image: ruby:3.3.4-alpine3.20@sha256:9fc2d9dd146a47fddcf2b69e3174d92ee1a654fbbe73f97b858505394748ac6e
+  script:
+  - gem install license_finder
+  - apk add --update npm
+  - license_finder --decisions_file ./docs/dependency_decisions.yml --enabled-package-managers npm
+
+iac:
+  stage: test
+  image: bridgecrew/checkov:3.2.208@sha256:528276dd7d05bb3901d4546208dbec2727744a0c3878de8e06d26d4f6cd4901f
+  script:
+  - checkov -d . --quiet
+
+next-build:
+  image: node:22.5.1-bookworm@sha256:86915971d2ce1548842315fcce7cda0da59319a4dab6b9fc0827e762ef04683a
+  stage: test
+  script:
+  - npm ci
+  - npm run build
+
+tag:
+  stage: tag
+  needs: []
+  dependencies: []
+  script:
+  - |
+    if [ -n "$CI_COMMIT_TAG" ]; then
+      # Set IMAGE_TAG if the pipeline was triggered by a tag
+      echo "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" > image-tag.txt
+      echo "$CI_REGISTRY_IMAGE/initcontainer:$CI_COMMIT_TAG" > initcontainer-image-tag.txt
+    else
+      # Set IMAGE_TAG if the pipeline was triggered by a push to main
+      branch=$(echo $CI_COMMIT_REF_NAME | sed 's/\//-/g')
+      sha=${CI_COMMIT_SHORT_SHA}
+      ts=$(date +%s)
+      echo "$CI_REGISTRY_IMAGE:${branch}-${sha}-${ts}" > image-tag.txt
+      echo "$CI_REGISTRY_IMAGE/initcontainer:${branch}-${sha}-${ts}" > initcontainer-image-tag.txt
+    fi
+  artifacts:
+    paths:
+    - image-tag.txt
+    - initcontainer-image-tag.txt
+  only:
+  - main
+  - tags
+
+
+oci:build:
+  stage: build
+  needs: [tag, jest, software-composition-analysis, static-application-security-testing, secret-scanning, license-compliance, iac]
+  dependencies: ["tag"]
+  image:
+    name: gcr.io/kaniko-project/executor:v1.23.2-debug@sha256:c3109d5926a997b100c4343944e06c6b30a6804b2f9abe0994d3de6ef92b028e
+    entrypoint: [""]
+  script:
+  - /kaniko/executor --digest-file=digest.txt --cleanup --build-arg NEXT_PUBLIC_ENVIRONMENT=production --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $(cat image-tag.txt)
+  artifacts:
+    paths:
+    - digest.txt
+    when: on_success
+  only:
+  - main
+  - tags
+  except:
+    variables:
+    - $CI_PIPELINE_SOURCE == "schedule"
+
+oci:build-initcontainer:
+  stage: build
+  needs: [tag, jest, software-composition-analysis, static-application-security-testing, secret-scanning, license-compliance, iac]
+  dependencies: ["tag"]
+  image:
+    name: gcr.io/kaniko-project/executor:v1.23.2-debug@sha256:c3109d5926a997b100c4343944e06c6b30a6804b2f9abe0994d3de6ef92b028e
+    entrypoint: [""]
+  script:
+  - /kaniko/executor --digest-file=initcontainer-digest.txt --cleanup --build-arg NEXT_PUBLIC_ENVIRONMENT=production --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile.initcontainer --destination $(cat initcontainer-image-tag.txt)
+  artifacts:
+    paths:
+    - initcontainer-digest.txt
+    when: on_success
+  only:
+  - main
+  - tags
+  except:
+    variables:
+    - $CI_PIPELINE_SOURCE == "schedule"
+
+container-scanning:
+  stage: container-scanning
+  needs: ["oci:build", "tag"]
+  dependencies:
+  - oci:build
+  - tag
+  image: alpine:3.20.2@sha256:0a4eaa0eecf5f8c050e5bba433f58c052be7587ee8af3e8b3910ef9ab5fbe9f5
+  before_script:
+  # download oras and login to the registry
+  - apk add --update curl
+  - *oci_login
+  - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.50.4
+  script:
+  - trivy image --exit-code 1 --severity CRITICAL --no-progress $(cat image-tag.txt)@$(cat digest.txt)
+  only:
+  - main
+  - tags
+  except:
+    variables:
+    - $CI_PIPELINE_SOURCE == "schedule"
+
+
+container-scanning-initcontainer:
+  stage: container-scanning
+  needs: ["oci:build-initcontainer", "tag"]
+  dependencies:
+  - oci:build-initcontainer
+  - tag
+  image: alpine:3.20.2@sha256:0a4eaa0eecf5f8c050e5bba433f58c052be7587ee8af3e8b3910ef9ab5fbe9f5
+  before_script:
+  # download oras and login to the registry
+  - apk add --update curl
+  - *oci_login
+  - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.50.4
+  script:
+  - trivy image --exit-code 1 --severity CRITICAL --no-progress $(cat initcontainer-image-tag.txt)@$(cat initcontainer-digest.txt)
+  only:
+  - main
+  - tags
+  except:
+    variables:
+    - $CI_PIPELINE_SOURCE == "schedule"
+
+sbom:
+  image: alpine:3.20.2@sha256:0a4eaa0eecf5f8c050e5bba433f58c052be7587ee8af3e8b3910ef9ab5fbe9f5
+  before_script:
+  - apk add --update curl
+  - *oci_login
+  - curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+  stage: publish
+  needs: ["oci:build", "tag"]
+  dependencies:
+  - oci:build
+  - tag
+  script:
+  - syft $(cat image-tag.txt)@$(cat digest.txt) -o cyclonedx-json=sbom.json
+  artifacts:
+    paths:
+    - sbom.json
+  only:
+  - main
+  - tags
+  except:
+    variables:
+    - $CI_PIPELINE_SOURCE == "schedule"
+
+sbom-initcontainer:
+  image: alpine:3.20.2@sha256:0a4eaa0eecf5f8c050e5bba433f58c052be7587ee8af3e8b3910ef9ab5fbe9f5
+  before_script:
+  - apk add --update curl
+  - *oci_login
+  - curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+  stage: publish
+  needs: ["oci:build-initcontainer", "tag"]
+  dependencies:
+  - oci:build-initcontainer
+  - tag
+  script:
+  - syft $(cat initcontainer-image-tag.txt)@$(cat initcontainer-digest.txt) -o cyclonedx-json=sbom.json
+  artifacts:
+    paths:
+    - sbom.json
+  only:
+  - main
+  - tags
+  except:
+    variables:
+    - $CI_PIPELINE_SOURCE == "schedule"
+
+sign-image:
+  stage: sign
+  needs: ['oci:build', 'tag']
+  dependencies:
+  - oci:build
+  - tag
+  image: alpine:3.20.2@sha256:0a4eaa0eecf5f8c050e5bba433f58c052be7587ee8af3e8b3910ef9ab5fbe9f5
+  before_script:
+  - apk add --update cosign
+  - apk add --update curl
+  - *oci_login
+  script:
+  - cosign sign --yes --key $COSIGN_PRIVATE_KEY "$(cat image-tag.txt)@$(cat digest.txt)"
+  only:
+  - main
+  - tags
+  except:
+    variables:
+    - $CI_PIPELINE_SOURCE == "schedule"
+
+sign-image-initcontainer:
+  stage: sign
+  needs: ['oci:build-initcontainer', 'tag']
+  dependencies:
+  - oci:build-initcontainer
+  - tag
+  image: alpine:3.20.2@sha256:0a4eaa0eecf5f8c050e5bba433f58c052be7587ee8af3e8b3910ef9ab5fbe9f5
+  before_script:
+  - apk add --update cosign
+  - apk add --update curl
+  - *oci_login
+  script:
+  - cosign sign --yes --key $COSIGN_PRIVATE_KEY "$(cat initcontainer-image-tag.txt)@$(cat initcontainer-digest.txt)"
+  only:
+  - main
+  - tags
+  except:
+    variables:
+    - $CI_PIPELINE_SOURCE == "schedule"
+
+sign-sbom:
+  stage: sign
+  needs: ["oci:build", 'tag', 'sbom']
+  dependencies:
+  - oci:build
+  - tag
+  - sbom
+  image: alpine:3.20.2@sha256:0a4eaa0eecf5f8c050e5bba433f58c052be7587ee8af3e8b3910ef9ab5fbe9f5
+  before_script:
+  - apk add --update cosign
+  - apk add --update curl
+  - *oci_login
+  script:
+  - cosign attest --yes --predicate ./sbom.json --key $COSIGN_PRIVATE_KEY "$(cat image-tag.txt)@$(cat digest.txt)"
+  only:
+  - main
+  - tags
+  except:
+    variables:
+    - $CI_PIPELINE_SOURCE == "schedule"
+
+sign-sbom-initcontainer:
+  stage: sign
+  needs: ["oci:build-initcontainer", 'tag', 'sbom-initcontainer']
+  dependencies:
+  - oci:build-initcontainer
+  - tag
+  - sbom-initcontainer
+  image: alpine:3.20.2@sha256:0a4eaa0eecf5f8c050e5bba433f58c052be7587ee8af3e8b3910ef9ab5fbe9f5
+  before_script:
+  - apk add --update cosign
+  - apk add --update curl
+  - *oci_login
+  script:
+  - cosign attest --yes --predicate ./sbom.json --key $COSIGN_PRIVATE_KEY "$(cat initcontainer-image-tag.txt)@$(cat initcontainer-digest.txt)"
+  only:
+  - main
+  - tags
+  except:
+    variables:
+    - $CI_PIPELINE_SOURCE == "schedule"

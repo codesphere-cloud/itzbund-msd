@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+  redis:
+    image: bitnami/redis
+    ports:
+    - "6379:6379"
+    environment:
+    - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+    - redis_data:/bitnami/redis/data
+
+  influxdb:
+    image: influxdb:2.7
+    ports:
+    - "8086:8086"
+    environment:
+    - DOCKER_INFLUXDB_INIT_USERNAME=ozgsec
+    - DOCKER_INFLUXDB_INIT_PASSWORD=secret
+    - DOCKER_INFLUXDB_INIT_ORG=ozgsec
+    - DOCKER_INFLUXDB_INIT_BUCKET=ozgsec
+    - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=secret
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    hostname: "rabbit1"
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "SWQOKODSQALRPCLNMEQG"
+      RABBITMQ_DEFAULT_USER: "rabbitmq"
+      RABBITMQ_DEFAULT_PASS: "rabbitmq"
+      RABBITMQ_DEFAULT_VHOST: "/"
+    ports:
+    - "15672:15672"
+    - "5672:5672"
+
+volumes:
+  redis_data:

@@ -1,0 +1,15 @@
+dependencies:
+- name: influxdb
+  repository: https://charts.bitnami.com/bitnami
+  version: 6.3.21
+- name: rabbitmq
+  repository: https://charts.bitnami.com/bitnami
+  version: 15.0.1
+- name: redis
+  repository: https://charts.bitnami.com/bitnami
+  version: 20.1.6
+- name: postgresql
+  repository: https://charts.bitnami.com/bitnami
+  version: 15.5.38
+digest: sha256:b08bf55a32c44b68b0081c3c5a4532dd2b1b3f810cf040a1e23006a6265c33e2
+generated: "2024-10-02T19:48:32.122729+02:00"

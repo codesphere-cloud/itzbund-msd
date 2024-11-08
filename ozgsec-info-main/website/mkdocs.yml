@@ -1,0 +1,33 @@
+site_name: OZG Security Challenge 2023
+repo_url: https://gitlab.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec
+repo_name: OZGSec auf Open CoDE
+copyright: © 2024 Bundesministerium des Inneren und für Heimat
+theme:
+  name: material
+  logo: https://www.bmi.bund.de/SiteGlobals/Frontend/Images/logo.svg;jsessionid=0A73910FC555EF7E9A0B686511F555E1.1_cid340?__blob=normal&v=7
+  favicon: assets/startseite-seite-favicon.png
+  custom_dir: overrides
+nav:
+  - Startseite: index.md
+  - Source Code:
+      - Best Practice Scanner: https://gitlab.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-best-practice-scanner
+      - Web Frontend: https://gitlab.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-web-frontend
+      - Helm Chart: https://gitlab.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-helm-chart
+      - Keycloak-Theme: https://gitlab.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-keycloak
+
+plugins:
+  - glightbox
+  
+
+markdown_extensions:
+  - attr_list
+  - md_in_html
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true 
+  - toc:
+      title: Inhaltsverzeichnis
+extra_css:
+  - stylesheets/extra.css

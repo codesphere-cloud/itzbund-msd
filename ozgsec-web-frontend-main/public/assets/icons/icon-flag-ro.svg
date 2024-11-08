@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 184.3 133.2" style="enable-background:new 0 0 184.25 133.23" xml:space="preserve">
+  <defs>
+    <path id="a" d="M-17-13h220v150H-17z"/>
+  </defs>
+  <clipPath id="b">
+    <use xlink:href="#a" style="overflow:visible"/>
+  </clipPath>
+  <g style="clip-path:url(#b)">
+    <defs>
+      <path id="c" d="M-17-13h220v150H-17z"/>
+    </defs>
+    <clipPath id="e">
+      <use xlink:href="#c" style="overflow:visible"/>
+    </clipPath>
+    <defs>
+      <filter id="d" filterUnits="userSpaceOnUse" x=".8" y=".7" width="183.8" height="134.4">
+        <feColorMatrix values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/>
+      </filter>
+    </defs>
+    <g style="clip-path:url(#e);mask:url(#SVGID_5_)">
+      <defs>
+        <path id="h" d="M1 1h184v134H1z"/>
+      </defs>
+      <clipPath id="i">
+        <use xlink:href="#h" style="overflow:visible"/>
+      </clipPath>
+      <path style="opacity:.35;clip-path:url(#i)" d="M1 1h184v134H1z"/>
+    </g>
+  </g>
+  <path style="clip-path:url(#b);fill:#2d2d7b" d="M6 6h58v123H6z"/>
+  <path style="clip-path:url(#b);fill:#fdd11c" d="M64 6h57v123H64z"/>
+  <path style="clip-path:url(#b);fill:#ce1d23" d="M121 6h58v123h-58z"/>
+</svg>

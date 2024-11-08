@@ -1,0 +1,69 @@
+version: '3'
+
+services:
+  scanner:
+    # https://gitlab.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-best-practice-scanner/container_registry
+    image: registry.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-best-practice-scanner:v1.0.0
+    environment:
+      REDIS_HOST: redis:6379
+      INFLUX_URL: http://influxdb:8086
+      INFLUX_ORG: ozgsec
+      INFLUX_BUCKET: ozgsec
+      INFLUX_TOKEN: secret
+      RABBITMQ_PASS: rabbitmq
+      RABBITMQ_USER: rabbitmq
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_CONNECTION_RETRIES: 1
+      SERVER_TIMEOUT: 10000
+      RIPE_SOURCE_APP: "quicktest-bmi-germany"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - rabbitmq
+      - redis
+  
+  redis:
+    image: bitnami/redis
+    ports:
+    - "6379:6379"
+    environment:
+    - ALLOW_EMPTY_PASSWORD=yes
+    volumes:
+    - redis_data:/bitnami/redis/data
+
+  postgresql:
+    image: docker.io/bitnami/postgresql:15
+    ports:
+    - "5432:5432"
+    env_file:
+    - .env.local
+    volumes:
+    - 'postgresql_data:/bitnami/postgresql'
+
+  influxdb:
+    image: influxdb:2.7
+    ports:
+    - "8086:8086"
+    environment:
+    - DOCKER_INFLUXDB_INIT_USERNAME=ozgsec
+    - DOCKER_INFLUXDB_INIT_PASSWORD=secret
+    - DOCKER_INFLUXDB_INIT_ORG=ozgsec
+    - DOCKER_INFLUXDB_INIT_BUCKET=ozgsec
+    - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=secret
+
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    hostname: "rabbit1"
+    environment:
+      RABBITMQ_ERLANG_COOKIE: "SWQOKODSQALRPCLNMEQG"
+      RABBITMQ_DEFAULT_USER: "rabbitmq"
+      RABBITMQ_DEFAULT_PASS: "rabbitmq"
+      RABBITMQ_DEFAULT_VHOST: "/"
+    ports:
+    - "15672:15672"
+    - "5672:5672"
+
+volumes:
+  redis_data:
+  postgresql_data:

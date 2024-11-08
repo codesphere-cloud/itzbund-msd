@@ -1,0 +1,184 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+stages:
+  - test
+  - tag
+  - build
+  - container-scanning
+  - publish
+  - sign
+
+.oci:login:
+  stage: test
+  script:
+  - &oci_login |
+    export VERSION="1.1.0"
+    export ORAS_SHASUM="e09e85323b24ccc8209a1506f142e3d481e6e809018537c6b3db979c891e6ad7"
+    curl -LO "https://github.com/oras-project/oras/releases/download/v${VERSION}/oras_${VERSION}_linux_amd64.tar.gz"
+    echo "${ORAS_SHASUM}  oras_${VERSION}_linux_amd64.tar.gz" | sha256sum -c -
+    mkdir -p oras-install/
+    tar -zxf oras_${VERSION}_*.tar.gz -C oras-install/
+    mv oras-install/oras /usr/local/bin/
+    rm -rf oras_${VERSION}_*.tar.gz oras-install/
+    echo "$CI_JOB_TOKEN" | oras login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+
+secret-scanning:
+  image: ghcr.io/gitleaks/gitleaks:v8.18.2@sha256:8bd05f793efe84e7bbba36c4e138080b88f6acb77f3865835024eb7bef30c41f
+  stage: test
+  variables:
+    GIT_DEPTH: 1
+  script:
+  - gitleaks -v detect --baseline-path gitleaks-report.json
+
+static-application-security-testing:
+  image: returntocorp/semgrep:1.72.0@sha256:18fcd539c83a1e8a3df78e77dddce457511f25dc2bd92b6e3bf999f51ab425d3
+  stage: test
+  script:
+  - semgrep scan --config=p/ci .
+
+software-composition-analysis:
+  image: node:20.13.1-bookworm@sha256:45da3826d21df329eacade6725afa328442710e094454407151c42fef1341b0c
+  stage: test
+  script:
+  # fail on critical
+  - npm audit --audit-level=critical
+
+license-compliance:
+  stage: test
+  image: ruby:3.3.1-alpine3.19@sha256:92047b87f9a122a10b22fba43ad647969a5c1ca43da663abebf5718dce1ab6a0
+  script:
+  - gem install license_finder
+  - apk add --update npm
+  - license_finder --decisions_file ./docs/dependency_decisions.yml --enabled-package-managers npm
+
+tag:
+  stage: tag
+  needs: []
+  dependencies: []
+  script:
+  - |
+    if [ -n "$CI_COMMIT_TAG" ]; then
+      # Set IMAGE_TAG if the pipeline was triggered by a tag
+      echo "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" > image-tag.txt
+    else
+      # Set IMAGE_TAG if the pipeline was triggered by a push to main
+      branch=$(echo $CI_COMMIT_REF_NAME | sed 's/\//-/g')
+      sha=${CI_COMMIT_SHORT_SHA}
+      ts=$(date +%s)
+      echo "$CI_REGISTRY_IMAGE:${branch}-${sha}-${ts}" > image-tag.txt
+    fi
+  artifacts:
+    paths:
+    - image-tag.txt
+  only:
+  - main
+  - tags
+
+oci:build:
+  stage: build
+  needs: [tag,software-composition-analysis,static-application-security-testing,secret-scanning,license-compliance]
+  dependencies: ["tag"]
+  image:
+    name: gcr.io/kaniko-project/executor:v1.22.0-debug@sha256:7b3699e9e105521075812cd3f3f4c62c913cb5cd113c929975502022df3bcf60
+    entrypoint: [""]
+  script:
+  - /kaniko/executor --digest-file=digest.txt --cleanup --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $(cat image-tag.txt)
+  artifacts:
+    paths:
+    - digest.txt
+    when: on_success
+  only:
+  - main
+  - tags
+
+oci:build-base-image:
+  stage: build
+  needs: [software-composition-analysis,static-application-security-testing,secret-scanning,license-compliance]
+  dependencies: []
+  image:
+    name: gcr.io/kaniko-project/executor:v1.22.0-debug@sha256:7b3699e9e105521075812cd3f3f4c62c913cb5cd113c929975502022df3bcf60
+    entrypoint: [""]
+  script:
+  - /kaniko/executor --digest-file=digest.txt --cleanup --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/base.Dockerfile --destination $CI_REGISTRY_IMAGE/base-image:latest
+  artifacts:
+    paths:
+    - digest.txt
+    when: on_success
+  only:
+  - main
+  - tags
+  when: manual
+
+container-scanning:
+  stage: container-scanning
+  needs: ["oci:build", "tag"]
+  dependencies:
+  - oci:build
+  - tag
+  image: alpine:3.19.1@sha256:c5b1261d6d3e43071626931fc004f70149baeba2c8ec672bd4f27761f8e1ad6b
+  before_script:
+  # download oras and login to the registry
+  - apk add --update curl
+  - *oci_login
+  - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.50.4
+  script:
+  - trivy image --exit-code 1 --severity CRITICAL --no-progress $(cat image-tag.txt)@$(cat digest.txt)
+  only:
+  - main
+  - tags
+
+sbom:
+  image: alpine:3.19.1@sha256:c5b1261d6d3e43071626931fc004f70149baeba2c8ec672bd4f27761f8e1ad6b
+  before_script:
+  - apk add --update curl
+  - *oci_login
+  - curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+  stage: publish
+  needs: ["oci:build", "tag"]
+  dependencies:
+  - oci:build
+  - tag
+  script:
+  - syft $(cat image-tag.txt)@$(cat digest.txt) -o cyclonedx-json=sbom.json
+  artifacts:
+    paths:
+    - sbom.json
+  only:
+  - main
+  - tags
+
+sign-image:
+  stage: sign
+  needs: ['oci:build', 'tag']
+  dependencies:
+  - oci:build
+  - tag
+  image: alpine:3.19.1@sha256:c5b1261d6d3e43071626931fc004f70149baeba2c8ec672bd4f27761f8e1ad6b
+  before_script:
+  - apk add --update cosign
+  - apk add --update curl
+  - *oci_login
+  script:
+  - cosign sign --yes --key $COSIGN_PRIVATE_KEY "$(cat image-tag.txt)@$(cat digest.txt)"
+  only:
+  - main
+  - tags
+
+sign-sbom:
+  stage: sign
+  needs: ["oci:build", 'tag', 'sbom']
+  dependencies:
+  - oci:build
+  - tag
+  - sbom
+  image: alpine:3.19.1@sha256:c5b1261d6d3e43071626931fc004f70149baeba2c8ec672bd4f27761f8e1ad6b
+  before_script:
+  - apk add --update cosign
+  - apk add --update curl
+  - *oci_login
+  script:
+  - cosign attest --predicate ./sbom.json --key $COSIGN_PRIVATE_KEY "$(cat image-tag.txt)@$(cat digest.txt)"
+  only:
+  - main
+  - tags

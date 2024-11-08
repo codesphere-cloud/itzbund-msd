@@ -1,0 +1,198 @@
+image: golang:1.22.5
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+stages:
+- test
+- tag
+- build
+- container-scanning
+- publish
+- sign
+
+secret-scanning:
+  image: ghcr.io/gitleaks/gitleaks:v8.18.2@sha256:8bd05f793efe84e7bbba36c4e138080b88f6acb77f3865835024eb7bef30c41f
+  stage: test
+  script: gitleaks -s . detect
+
+static-application-security-testing:
+  stage: test
+  image: golangci/golangci-lint:v1.58.1@sha256:5bef7ef61a4e2529b39d4e39de3564d82c38291636cdb9b79a656cedb09ab175
+  script:
+  - golangci-lint run --timeout 5m
+
+software-composition-analysis:
+  stage: test
+  image: golang:1.22.5
+  script:
+  - go install golang.org/x/vuln/cmd/govulncheck@latest
+  - govulncheck ./...
+
+gotest:
+  stage: test
+  script:
+  - go test -v -coverpkg=./... -coverprofile=profile.cov ./...
+  - go tool cover -func profile.cov
+
+license-compliance:
+  stage: test
+  image: ruby:3.3.1-alpine3.19@sha256:92047b87f9a122a10b22fba43ad647969a5c1ca43da663abebf5718dce1ab6a0
+  script:
+  - gem install license_finder
+  - wget https://dl.google.com/go/go1.22.3.linux-amd64.tar.gz
+  - echo "8920ea521bad8f6b7bc377b4824982e011c19af27df88a815e3586ea895f1b36 go1.22.3.linux-amd64.tar.gz" | sha256sum -c -
+  - tar -C /usr/local -xzf go1.22.3.linux-amd64.tar.gz
+  - export PATH=$PATH:/usr/local/go/bin
+  - license_finder --decisions_file ./docs/dependency_decisions.yml --enabled-package-managers gomodules
+
+iac:
+  stage: test
+  image: bridgecrew/checkov:3.2.98@sha256:2a280191e5b9e3890c7b64013955b48870e7e2a6fb5ae10a558d03b3aa81510b
+  script:
+  - checkov -d . --quiet
+
+tag:
+  stage: tag
+  needs: []
+  dependencies: []
+  script:
+  - |
+    if [ -n "$CI_COMMIT_TAG" ]; then
+      # Set IMAGE_TAG if the pipeline was triggered by a tag
+      echo "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG" > image-tag.txt
+    else
+      # Set IMAGE_TAG if the pipeline was triggered by a push to main
+      branch=$(echo $CI_COMMIT_REF_NAME | sed 's/\//-/g')
+      sha=${CI_COMMIT_SHORT_SHA}
+      ts=$(date +%s)
+      echo "$CI_REGISTRY_IMAGE:${branch}-${sha}-${ts}" > image-tag.txt
+    fi
+  artifacts:
+    paths:
+    - image-tag.txt
+  only:
+  - main
+  - tags
+
+.oci:login:
+  stage: test
+  script:
+  - &oci_login |
+    export VERSION="1.1.0"
+    export ORAS_SHASUM="e09e85323b24ccc8209a1506f142e3d481e6e809018537c6b3db979c891e6ad7"
+    curl -LO "https://github.com/oras-project/oras/releases/download/v${VERSION}/oras_${VERSION}_linux_amd64.tar.gz"
+    echo "${ORAS_SHASUM}  oras_${VERSION}_linux_amd64.tar.gz" | sha256sum -c -
+    mkdir -p oras-install/
+    tar -zxf oras_${VERSION}_*.tar.gz -C oras-install/
+    mv oras-install/oras /usr/local/bin/
+    rm -rf oras_${VERSION}_*.tar.gz oras-install/
+    echo "$CI_JOB_TOKEN" | oras login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+  except:
+    variables:
+    - $CI_PIPELINE_SOURCE == "schedule"
+
+oci:build:
+  stage: build
+  needs: [tag, secret-scanning, static-application-security-testing, software-composition-analysis, gotest, license-compliance, iac]
+  dependencies: ["tag"]
+  image:
+    name: gcr.io/kaniko-project/executor:v1.22.0-debug@sha256:7b3699e9e105521075812cd3f3f4c62c913cb5cd113c929975502022df3bcf60
+    entrypoint: [""]
+  script:
+  - /kaniko/executor --digest-file=digest.txt --cleanup --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $(cat image-tag.txt)
+  artifacts:
+    paths:
+    - digest.txt
+    when: on_success
+  only:
+  - main
+  - tags
+  except:
+    variables:
+    - $CI_PIPELINE_SOURCE == "schedule"
+
+container-scanning:
+  stage: container-scanning
+  needs: ["oci:build", "tag"]
+  dependencies:
+  - oci:build
+  - tag
+  image: alpine:3.19.1@sha256:c5b1261d6d3e43071626931fc004f70149baeba2c8ec672bd4f27761f8e1ad6b
+  before_script:
+  # download oras and login to the registry
+  - apk add --update curl
+  - *oci_login
+  - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.50.4
+  script:
+  - trivy image --exit-code 1 --severity CRITICAL --no-progress $(cat image-tag.txt)@$(cat digest.txt)
+  only:
+  - main
+  - tags
+  except:
+    variables:
+    - $CI_PIPELINE_SOURCE == "schedule"
+
+sbom:
+  image: alpine:3.19.1@sha256:c5b1261d6d3e43071626931fc004f70149baeba2c8ec672bd4f27761f8e1ad6b
+  before_script:
+  - apk add --update curl
+  - *oci_login
+  - curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+  stage: publish
+  needs: ["oci:build", "tag"]
+  dependencies:
+  - oci:build
+  - tag
+  script:
+  - syft $(cat image-tag.txt)@$(cat digest.txt) -o cyclonedx-json=sbom.json
+  artifacts:
+    paths:
+    - sbom.json
+  only:
+  - main
+  - tags
+  except:
+    variables:
+    - $CI_PIPELINE_SOURCE == "schedule"
+
+sign-image:
+  stage: sign
+  needs: ['oci:build', 'tag']
+  dependencies:
+  - oci:build
+  - tag
+  image: alpine:3.19.1@sha256:c5b1261d6d3e43071626931fc004f70149baeba2c8ec672bd4f27761f8e1ad6b
+  before_script:
+  - apk add --update cosign
+  - apk add --update curl
+  - *oci_login
+  script:
+  - cosign sign --yes --key $COSIGN_PRIVATE_KEY "$(cat image-tag.txt)@$(cat digest.txt)"
+  only:
+  - main
+  - tags
+  except:
+    variables:
+    - $CI_PIPELINE_SOURCE == "schedule"
+
+sign-sbom:
+  stage: sign
+  needs: ["oci:build", 'tag', 'sbom']
+  dependencies:
+  - oci:build
+  - tag
+  - sbom
+  image: alpine:3.19.1@sha256:c5b1261d6d3e43071626931fc004f70149baeba2c8ec672bd4f27761f8e1ad6b
+  before_script:
+  - apk add --update cosign
+  - apk add --update curl
+  - *oci_login
+  script:
+  - cosign attest --yes --predicate ./sbom.json --key $COSIGN_PRIVATE_KEY "$(cat image-tag.txt)@$(cat digest.txt)"
+  only:
+  - main
+  - tags
+  except:
+    variables:
+    - $CI_PIPELINE_SOURCE == "schedule"

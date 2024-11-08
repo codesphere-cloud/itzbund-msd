@@ -1,0 +1,57 @@
+enabledChecks:
+# # content checks
+- subResourceIntegrity
+- noMixedContent
+
+# # organizational checks
+- responsibleDisclosure
+
+# # dns checks
+- dnsSec
+- caa
+
+# # networking
+- rpki
+- ipv6
+
+
+# # http and configuration
+- http
+- http308
+- httpRedirectsToHttps
+
+# # https
+- https
+- hsts
+- hstsPreloaded
+
+# # header checks
+- contentSecurityPolicy
+- xFrameOptions
+- xssProtection
+- contentTypeOptions
+- secureSessionCookies
+
+# # encryption & certificate
+- tlsv1_3
+- tlsv1_2
+- deprecatedTLSDeactivated
+- strongKeyExchange
+- strongCipherSuites
+- validCertificate
+- strongPrivateKey
+- strongSignatureAlgorithm
+- matchesHostname
+- notRevoked
+- certificateTransparency
+- validCertificateChain
+
+# # mail checks
+- dkim
+- dmarc
+- spf
+- starttls
+- dane
+
+# # accessibility checks
+- providesEnglishWebsiteVersion

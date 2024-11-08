@@ -1,0 +1,172 @@
+# checkov:skip=CKV_OPENAPI_4:
+# checkov:skip=CKV_OPENAPI_21:
+openapi: 3.0.3
+servers: []
+info:
+  version: 1.0.0
+  title: API Endpunkte
+  contact:
+    name: API Support
+    email: ozgsec@bmi.bund.de
+    url: https://gitlab.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-best-practice-scanner
+  license:
+    name: EUPL-1.2
+    url: "https://eupl.eu/1.2/de/"
+paths:
+  /:
+    get:
+      summary: Überprüfen einer Webseite
+      description: Überprüft den Umsetzungsgrad von Best Practices und Sicherheitsmaßnahmen einer Webseite. Gibt einen JSON-Report zurück.
+      operationId: scan
+      parameters:
+        - name: target
+          in: query
+          description: Domain der zu überprüfenden Webseite
+          required: true
+          schema:
+            type: string
+        - name: refresh
+          in: query
+          description: Erzwingt einen Scan ohne Cache
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: socks5Proxy
+          in: query
+          description: SOCKS5-Proxy-Server in dem Format <user>:<pass>@<socks-proxy.domain>:<port>
+          required: false
+          schema:
+            type: string
+      responses:
+        "400":
+          description: bad request - Fehlende zu überprüfende Domain oder kein gültiger vollqualifizierter Domainname (fully qualified domain name).
+        "500":
+          description: internal server error - Ein serverseitiger Fehler ist aufgetreten.
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ScanReport"
+  /health: 
+    get: 
+      summary: Health-Check
+      description: Gibt einen Status-Code 200 zurück, wenn der Service grundsätzlich erreichbar ist. Wird für Monitoring-Zwecke verwendet.
+      operationId: health
+      responses: 
+        "200": 
+          description: successful operation
+components:
+  # checkov:skip=CKV_OPENAPI_5:
+  securitySchemes: {}
+  schemas:
+    ScanReport:
+      type: object
+      properties: 
+        $schema: 
+          type: string
+          description: JSON-Schema-Version - currently SARIF 2.1.0
+        runs: 
+          type: array
+          items: 
+            type: object
+            properties: 
+              invocations: 
+                type: array
+                items: 
+                  type: object
+                  properties: 
+                    endTimeUtc: 
+                      type: string
+                      format: date-time
+                    executionSuccessful: 
+                      type: boolean
+                    exitCode: 
+                      type: integer
+                    exitCodeDescription: 
+                      type: string
+                    startTimeUtc: 
+                      type: string
+                      format: date-time
+              properties: 
+                type: object
+                properties: 
+                  ipAddress: 
+                    type: string
+                  sut: 
+                    type: string
+                    description: System under test
+                  target: 
+                    type: string
+                    description: Vom Benutzer angegebenes Ziel
+              results: 
+                type: array
+                items: 
+                  type: object
+                  properties: 
+                    kind: 
+                      type: string
+                      enum: 
+                        - fail
+                        - pass
+                    message: 
+                      type: object
+                      properties: 
+                        text: 
+                          type: string
+                    properties: 
+                      type: object
+                      properties: 
+                        actualValue: 
+                          type: object
+                          format: nullable
+                          description: 'Der tatsächliche Wert, der vom Tool für den Scan erfasst wurde. Bei dem contentTypeOptions Check z. B.: { "X-Content-Type-Options": "" }'
+                        durationMs: 
+                          type: integer
+                          format: int32
+                        errorIds: 
+                          type: array
+                          items: 
+                            type: string
+                        recommendationIds: 
+                          type: array
+                          items: 
+                            type: string
+                    ruleId: 
+                      type: string
+                    ruleIndex: 
+                      type: integer
+                      format: int32
+              tool: 
+                type: object
+                properties: 
+                  driver: 
+                    type: object
+                    properties: 
+                      name: 
+                        type: string
+                      properties: 
+                        type: object
+                        properties: 
+                          scannerIp: 
+                            type: string
+                            description: IP-Adresse des Scanners (bei der Verwendung eines socks5Proxys wird die IP-Adresse des Proxys zurückgegeben)
+                      rules: 
+                        type: array
+                        items: 
+                          type: object
+                          properties: 
+                            fullDescription: 
+                              type: object
+                              properties: 
+                                text: 
+                                  type: string
+                            id: 
+                              type: string
+                            name: 
+                              type: string
+                      version: 
+                        type: string
+        version: 
+          type: string

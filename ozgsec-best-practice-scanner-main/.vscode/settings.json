@@ -1,0 +1,7 @@
+{
+    "cSpell.words": [
+        "Cacheable",
+        "nolint"
+    ],
+    "go.lintTool": "golangci-lint"
+}

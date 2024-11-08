@@ -1,0 +1,230 @@
+
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+    font-size: 16px;
+}
+
+body {
+    background-image: none!important;
+    background:white!important;
+    font-family: BundesSans;
+}
+
+@media all and (max-width: 768px) {
+    body, html {
+        font-size: 12px;
+    }
+}
+
+.card-pf {
+   @apply bg-bund text-white text-base;
+   margin-bottom: 100px!important;
+}
+.btn-primary {
+    @apply text-base bg-white text-textblack rounded-sm border border-white hover:bg-bund hover:text-white hover:border-white transition-all
+}
+
+.btn-default {
+    @apply text-base bg-white text-textblack rounded-sm border border-white hover:bg-bund hover:text-white hover:border-white transition-all
+}
+
+h1 {
+    font-weight: bold;
+    font-size: 27px!important
+}
+
+.alert {
+    border: none!important
+}
+
+#kc-header-wrapper {
+    @apply text-textblack text-2xl font-bold;
+    text-transform: none;
+}
+
+.form-control  {
+    padding: 5px 0px;
+    font-size: 16px;
+    height: auto!important;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-family: BundesSans;
+    @apply bg-transparent text-white shadow-none text-base border-b-white border-b focus:border-b-white focus:shadow-none;
+}
+
+label {
+    @apply text-sm
+}
+a {
+    color: white!important;
+    text-decoration: underline;
+}
+
+input {
+  
+}
+
+.login-pf-page .login-pf-signup {
+    color: white!important;
+}
+
+.checkbox {
+    color: white!important;
+}
+
+.checkbox > label {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+}
+
+.checkbox > label > input {
+    margin: 0px;
+}
+
+input[type="checkbox"] {
+    accent-color: white;
+    @apply w-3 h-3 m-5
+}
+
+#kc-registration {
+    display: none;
+}
+
+.alert>.pficon {
+    top: 15px;
+}
+
+
+.login-pf {
+    background: none;
+}
+
+footer a {
+    text-decoration: none;
+}
+
+#root > div {
+    min-height: calc(100vh - 230px);
+
+}
+
+.ml-10 {
+    margin-left: 20px;
+}
+
+#kc-current-locale-link::after {
+    display: none;
+}
+
+#kc-locale-dropdown #kc-current-locale-link {
+    @apply bg-hellgrau-80 mb-10;
+    text-decoration: none;
+    float: right;
+    padding: 2px 10px;
+    color: black!important;
+}
+
+#kc-locale-dropdown ul {
+    @apply bg-hellgrau-20 border border-hellgrau-60;
+    padding: 2px
+}
+
+#kc-locale ul li.kc-dropdown-item a {
+    @apply text-textblack hover:text-white;
+    transition: all 0.25s
+}
+
+#kc-locale ul li.kc-dropdown-item a:hover {
+    @apply bg-bund;
+    color: white!important;
+}
+
+#kc-locale ul {
+    display: block;
+    scale: 0.5;
+    transform-origin: top right;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.25s;
+}
+
+#kc-locale-dropdown:hover ul {
+    opacity: 1;
+    pointer-events: auto;
+    scale: 1;
+}
+
+.login-pf-page .card-pf p {
+    color: white!important;
+}
+
+.has-error .checkbox, .has-error .checkbox-inline, .has-error .control-label, .has-error .radio, .has-error .radio-inline, .has-error.checkbox label, .has-error.checkbox-inline label, .has-error.radio label, .has-error.radio-inline label, .has-success .checkbox, .has-success .checkbox-inline, .has-success .control-label, .has-success .radio, .has-success .radio-inline, .has-success.checkbox label, .has-success.checkbox-inline label, .has-success.radio label, .has-success.radio-inline label, .has-warning .checkbox, .has-warning .checkbox-inline, .has-warning .control-label, .has-warning .radio, .has-warning .radio-inline, .has-warning.checkbox label, .has-warning.checkbox-inline label, .has-warning.radio label, .has-warning.radio-inline label {
+    color: white!important;
+}
+
+.login-pf-settings {
+    display: block!important;
+}
+
+.subtitle {
+    color: rgba(255,255,255,0.75);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+#kc-username {
+    display: none;
+}
+
+
+
+@media screen and (max-width: 768px) {
+    .login-pf-page {
+        padding-top: 0px;
+    }
+    .login-pf-page .card-pf {
+        padding-top: 80px;
+        margin-bottom: 0px;
+    }
+    #kc-header {
+        display: none;
+    }
+    #kc-locale {
+        top: 40px!important
+    }
+    #kc-info-wrapper {
+        border: none;
+    }
+    .card-pf {
+        margin-bottom: 0px!important;
+    }
+}
+
+.tw-container {
+    @apply container
+}
+
+.transition-bund {
+    transition: all 500ms ease-in-out 0ms
+}
+
+header {
+    z-index: 99999;
+}
+
+#kc-form-options {
+     @apply mb-14;
+}
+
+#kc-form-buttons {
+    @apply mt-4;
+}

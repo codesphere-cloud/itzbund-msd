@@ -1,0 +1,34 @@
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive
+
+stages:
+- test
+- publish
+
+checkov:
+  stage: test
+  image:
+    name: bridgecrew/checkov:3.2.256@sha256:f14b73f5c511b4cd70dcfc4e76aa0166caa2963906387abb23884c490b91ef3b
+    entrypoint:
+    - '/usr/bin/env'
+    - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+  script:
+  # disable "Default namespace should not be used" check
+  - checkov -d charts/ozgsec --framework helm --quiet --skip-path ozgsec/charts --skip-path ozgsec/templates/NOTES.txt --skip-check CKV_K8S_21 --skip-check CKV_K8S_15 --skip-check CKV_K8S_43
+  artifacts:
+    reports:
+      junit: "checkov.test.xml"
+    paths:
+    - "checkov.test.xml"
+
+helm:
+  stage: publish
+  image: dtzar/helm-kubectl:3.10.0@sha256:489617317614daad6181603d55319c35529b9d41bfc4a23a11e8e3109a5f5588
+  before_script:
+  - 'helm repo add --username gitlab-ci-token --password ${CI_JOB_TOKEN} ${CI_PROJECT_NAME} ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/helm/stable'
+  - helm dependency update ./charts/ozgsec
+  script:
+  - 'helm plugin install https://github.com/chartmuseum/helm-push.git'
+  - ./helm-package-and-push.sh
+  only:
+  - tags

@@ -1,0 +1,115 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: best-practices-scanner-deployment
+  labels:
+    {{- include "ozgsec.labels" . | nindent 4 }}
+  annotations:
+    checkov.io/skip1: CKV_K8S_35=Issue opened - https://gitlab.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-best-practice-scanner/-/issues/1
+    checkov.io/skip2: CKV_K8S_9=Issue opened - https://gitlab.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-best-practice-scanner/-/issues/2
+    checkov.io/skip3: CKV_K8S_8=Issue opened - https://gitlab.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-best-practice-scanner/-/issues/2
+    checkov.io/skip4: CKV_K8S_22=Issue opened - https://gitlab.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-helm-chart/-/issues/3
+spec:
+  {{- if not .Values.bestPracticesScanner.autoscaling.enabled }}
+  replicas: {{ .Values.bestPracticesScanner.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+        app: best-practices-scanner
+  template:
+    metadata:
+      {{- with .Values.bestPracticesScanner.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app: best-practices-scanner
+    spec:
+      {{- with .Values.bestPracticesScanner.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      automountServiceAccountToken: false
+      securityContext:
+        seccompProfile:
+          type: RuntimeDefault
+        runAsUser: 53111
+        runAsNonRoot: true
+      containers:
+        - name: best-practices-scanner
+          securityContext:
+            seccompProfile:
+              type: RuntimeDefault
+            allowPrivilegeEscalation: false
+            runAsUser: 53111
+            runAsNonRoot: true
+            capabilities:
+                drop:
+                - ALL
+          image: "{{.Values.bestPracticesScanner.image.repository}}:{{ .Values.bestPracticesScanner.image.tag | default "latest" }}"
+          imagePullPolicy: {{ .Values.bestPracticesScanner.image.pullPolicy }}
+          volumeMounts:
+          - name: config-volume
+            mountPath: /etc/best-practices-scanner/
+            readOnly: true
+          ports:
+            - containerPort: 8080
+          env:
+            - name: INFLUX_URL
+              value: http://{{ .Release.Name }}-influxdb:8086 
+            - name: RABBITMQ_HOST
+              value: {{.Release.Name}}-rabbitmq
+            - name : RABBITMQ_PORT
+              value: "5672"
+            - name: RABBITMQ_USER
+              value: ozgsec
+            - name: RABBITMQ_CONNECTION_RETRIES
+              value: {{ .Values.bestPracticesScanner.config.rabbitMQConnectionRetries | default "0" | quote }}
+            - name: RIPE_SOURCE_APP
+              value: {{ .Values.bestPracticesScanner.ripeSourceApp | default "" | quote }}
+            - name: RABBITMQ_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: rabbitmq-credentials
+                  key: rabbitmq-password
+            - name: INFLUX_ORG
+              value: ozgsec
+            - name: INFLUX_BUCKET
+              value: best-practices-scanner
+            - name: REDIS_HOST
+              value: {{ .Release.Name }}-redis-master:6379
+            - name: INFLUX_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  optional: true
+                  name: influxdb-token
+                  key: token
+            - name: LOG_LEVEL
+              value: {{ .Values.bestPracticesScanner.logLevel | default "info" | quote }}
+            - name: GOMEMLIMIT
+              value: {{ .Values.bestPracticesScanner.gomemlimit | default "750MiB" | quote }}
+            - name: SLACK_WEBHOOK_URL
+              value: {{ .Values.bestPracticesScanner.slackWebhookUrl | default "" | quote }}
+          resources:
+            limits:
+                cpu: "2"
+                memory: 750Mi
+            requests:
+                cpu: "0.001"
+                memory: 128Mi
+      {{- with .Values.bestPracticesScanner.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.bestPracticesScanner.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.bestPracticesScanner.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      - name: config-volume
+        configMap:
+            name: best-practices-scanner-configmap

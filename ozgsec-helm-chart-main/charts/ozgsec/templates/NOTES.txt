@@ -1,0 +1,51 @@
+{{- $secretObj := (lookup "v1" "Secret" .Release.Namespace "keycloak") }}
+{{- $secretData := (get $secretObj "data") | default dict  }}
+
+{{- $adminUsername := (get $secretData "ADMIN_USERNAME") }}
+{{- $adminPass := (get $secretData "ADMIN_PASS") }}
+
+
+
+
+
+
+██████╗ ███████╗ ██████╗ ███████╗███████╗ ██████╗
+██╔═══██╗╚══███╔╝██╔════╝ ██╔════╝██╔════╝██╔════╝
+██║   ██║  ███╔╝ ██║  ███╗███████╗█████╗  ██║     
+██║   ██║ ███╔╝  ██║   ██║╚════██║██╔══╝  ██║     
+╚██████╔╝███████╗╚██████╔╝███████║███████╗╚██████╗
+ ╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝╚══════╝ ╚═════
+
+Thank you for installing {{ .Chart.Name }}.
+
+Your release is named {{ .Release.Name }}.
+
+The next steps are:
+
+1. Visit keycloak at: {{ include "keycloak.hostname" . }}
+2. Login in using the following credentials:
+   username: {{ $adminUsername | b64dec }}
+   password: {{ $adminPass | b64dec }}
+3. Navigate to this url: {{ include "keycloak.hostnameAndProtocol" . }}/admin/master/console/#/master/clients/add-client
+4. Add a new OpenID-Connect Client.
+   Client ID: web-frontend
+
+   On the next step enable "Client Authentication", the rest can stay with the default.
+
+   Root-URL: {{ include "webFrontend.hostnameAndProtocol" . }}
+   Home-URL: {{ include "webFrontend.hostnameAndProtocol" . }}
+   Valid-Redirect URIs: {{ include "webFrontend.hostnameAndProtocol" . }}/*
+   Valid Post logout redirect URIs: {{ include "webFrontend.hostnameAndProtocol" . }}
+
+5. Go to the credentials tab and copy the client secret.
+6. Create a new secret:
+
+   kubectl create secret generic web-frontend-keycloak-secret -n {{ .Release.Namespace }} --from-literal=keycloak-secret='<CLIENT SECRET>'
+
+7. Apply the secret - now the Web-Frontend Pod should be able to start
+8. Create a new client scope under this url: {{ include "keycloak.hostnameAndProtocol" . }}/admin/master/console/#/master/client-scopes in keycloak with the name "realm-management-roles".
+9. After creating this scope, it can be configured. Add a predefined mapper in the Mappers tab with the name: "realm roles"
+10. The last step in keycloak is to apply this new client scope to the web-frontend client we created earlier. 
+      This can be done under the client scopes tab in the client details area of the web-frontend client ({{ include "keycloak.hostnameAndProtocol" . }}/admin/master/console/#/master/clients - search here for the "web-frontend" client).
+      Click on "Add client scope" and select "realm-management-roles". Click on "Add - Default". 
+11. Navigate to {{ include "webFrontend.hostnameAndProtocol" . }}

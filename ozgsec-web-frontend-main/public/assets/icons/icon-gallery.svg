@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 23 16">
+  <g data-name="gallery">
+    <rect x="5" y="1" width="2" height="14" rx=".3" ry=".3"/>
+    <rect x="1" y="1" width="2" height="14" rx=".3" ry=".3"/>
+    <path d="M22 1H9v14h13V1Zm-2 2v10h-9V3Z"/>
+  </g>
+</svg>

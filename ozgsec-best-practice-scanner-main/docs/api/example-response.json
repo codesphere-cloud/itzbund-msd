@@ -1,0 +1,863 @@
+{
+    "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+    "runs": [
+      {
+        "invocations": [
+          {
+            "endTimeUtc": "2024-05-14T08:19:45Z",
+            "executionSuccessful": true,
+            "exitCode": 0,
+            "exitCodeDescription": "success",
+            "startTimeUtc": "2024-05-14T08:19:44Z"
+          }
+        ],
+        "properties": {
+          "ipAddress": "93.184.215.14",
+          "sut": "example.com",
+          "target": "example.com"
+        },
+        "results": [
+          {
+            "kind": "pass",
+            "message": {
+              "text": "the test for rule matchesHostname was successful"
+            },
+            "properties": {
+              "actualValue": null,
+              "durationMs": 0,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "matchesHostname",
+            "ruleIndex": 0
+          },
+          {
+            "kind": "fail",
+            "message": {
+              "text": "the test for rule strongPrivateKey failed"
+            },
+            "properties": {
+              "actualValue": null,
+              "durationMs": 0,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "strongPrivateKey",
+            "ruleIndex": 1
+          },
+          {
+            "kind": "fail",
+            "message": {
+              "text": "the test for rule contentTypeOptions failed"
+            },
+            "properties": {
+              "actualValue": {
+                "X-Content-Type-Options": ""
+              },
+              "durationMs": 0,
+              "errorIds": [
+                "missingHeader",
+                "notNoSniff"
+              ],
+              "recommendationIds": []
+            },
+            "ruleId": "contentTypeOptions",
+            "ruleIndex": 2
+          },
+          {
+            "kind": "pass",
+            "message": {
+              "text": "the test for rule http was successful"
+            },
+            "properties": {
+              "actualValue": null,
+              "durationMs": 0,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "http",
+            "ruleIndex": 3
+          },
+          {
+            "kind": "notApplicable",
+            "message": {
+              "text": "the test for rule strongKeyExchange was not applicable"
+            },
+            "properties": {
+              "actualValue": null,
+              "durationMs": 0,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "strongKeyExchange",
+            "ruleIndex": 4
+          },
+          {
+            "kind": "pass",
+            "message": {
+              "text": "the test for rule providesEnglishWebsiteVersion was successful"
+            },
+            "properties": {
+              "actualValue": {
+                "propability": 1
+              },
+              "durationMs": 2,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "providesEnglishWebsiteVersion",
+            "ruleIndex": 5
+          },
+          {
+            "kind": "notApplicable",
+            "message": {
+              "text": "the test for rule secureSessionCookies was not applicable"
+            },
+            "properties": {
+              "actualValue": null,
+              "durationMs": 0,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "secureSessionCookies",
+            "ruleIndex": 6
+          },
+          {
+            "kind": "fail",
+            "message": {
+              "text": "the test for rule xFrameOptions failed"
+            },
+            "properties": {
+              "actualValue": {
+                "X-Frame-Options": ""
+              },
+              "durationMs": 0,
+              "errorIds": [
+                "notDenyOrSameOrigin",
+                "missingHeader"
+              ],
+              "recommendationIds": []
+            },
+            "ruleId": "xFrameOptions",
+            "ruleIndex": 7
+          },
+          {
+            "kind": "fail",
+            "message": {
+              "text": "the test for rule xssProtection failed"
+            },
+            "properties": {
+              "actualValue": {
+                "X-XSS-Protection": ""
+              },
+              "durationMs": 0,
+              "errorIds": [
+                "missingHeader",
+                "notEnabled",
+                "missingModeBlock"
+              ],
+              "recommendationIds": []
+            },
+            "ruleId": "xssProtection",
+            "ruleIndex": 8
+          },
+          {
+            "kind": "pass",
+            "message": {
+              "text": "the test for rule strongCipherSuites was successful"
+            },
+            "properties": {
+              "actualValue": null,
+              "durationMs": 338,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "strongCipherSuites",
+            "ruleIndex": 9
+          },
+          {
+            "kind": "notApplicable",
+            "message": {
+              "text": "the test for rule starttls was not applicable"
+            },
+            "properties": {
+              "actualValue": {
+                ".:25": null,
+                ".:587": null
+              },
+              "durationMs": 52,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "starttls",
+            "ruleIndex": 10
+          },
+          {
+            "kind": "pass",
+            "message": {
+              "text": "the test for rule spf was successful"
+            },
+            "properties": {
+              "actualValue": {
+                "spf": "v=spf1 -all"
+              },
+              "durationMs": 48,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "spf",
+            "ruleIndex": 11
+          },
+          {
+            "kind": "notApplicable",
+            "message": {
+              "text": "the test for rule dane was not applicable"
+            },
+            "properties": {
+              "actualValue": {
+                ".:25": null,
+                ".:587": null
+              },
+              "durationMs": 52,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "dane",
+            "ruleIndex": 12
+          },
+          {
+            "kind": "pass",
+            "message": {
+              "text": "the test for rule notRevoked was successful"
+            },
+            "properties": {
+              "actualValue": null,
+              "durationMs": 639,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "notRevoked",
+            "ruleIndex": 13
+          },
+          {
+            "kind": "notApplicable",
+            "message": {
+              "text": "the test for rule subResourceIntegrity was not applicable"
+            },
+            "properties": {
+              "actualValue": null,
+              "durationMs": 0,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "subResourceIntegrity",
+            "ruleIndex": 14
+          },
+          {
+            "kind": "fail",
+            "message": {
+              "text": "the test for rule responsibleDisclosure failed"
+            },
+            "properties": {
+              "actualValue": {
+                "statusCode": 404
+              },
+              "durationMs": 432,
+              "errorIds": [
+                "missingResponsibleDisclosure"
+              ],
+              "recommendationIds": []
+            },
+            "ruleId": "responsibleDisclosure",
+            "ruleIndex": 15
+          },
+          {
+            "kind": "fail",
+            "message": {
+              "text": "the test for rule deprecatedTLSDeactivated failed"
+            },
+            "properties": {
+              "actualValue": {
+                "tlsv1_0Supported": true,
+                "tlsv1_1Supported": true
+              },
+              "durationMs": 679,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "deprecatedTLSDeactivated",
+            "ruleIndex": 16
+          },
+          {
+            "kind": "fail",
+            "message": {
+              "text": "the test for rule dmarc failed"
+            },
+            "properties": {
+              "actualValue": null,
+              "durationMs": 49,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "dmarc",
+            "ruleIndex": 17
+          },
+          {
+            "kind": "pass",
+            "message": {
+              "text": "the test for rule strongSignatureAlgorithm was successful"
+            },
+            "properties": {
+              "actualValue": null,
+              "durationMs": 0,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "strongSignatureAlgorithm",
+            "ruleIndex": 18
+          },
+          {
+            "kind": "pass",
+            "message": {
+              "text": "the test for rule https was successful"
+            },
+            "properties": {
+              "actualValue": null,
+              "durationMs": 0,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "https",
+            "ruleIndex": 19
+          },
+          {
+            "kind": "fail",
+            "message": {
+              "text": "the test for rule hsts failed"
+            },
+            "properties": {
+              "actualValue": {
+                "Strict-Transport-Security": ""
+              },
+              "durationMs": 0,
+              "errorIds": [
+                "missingHeader",
+                "missingMaxAge"
+              ],
+              "recommendationIds": [
+                "missingIncludeSubDomains"
+              ]
+            },
+            "ruleId": "hsts",
+            "ruleIndex": 20
+          },
+          {
+            "kind": "fail",
+            "message": {
+              "text": "the test for rule httpRedirectsToHttps failed"
+            },
+            "properties": {
+              "actualValue": null,
+              "durationMs": 0,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "httpRedirectsToHttps",
+            "ruleIndex": 21
+          },
+          {
+            "kind": "pass",
+            "message": {
+              "text": "the test for rule validCertificate was successful"
+            },
+            "properties": {
+              "actualValue": null,
+              "durationMs": 0,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "validCertificate",
+            "ruleIndex": 22
+          },
+          {
+            "kind": "notApplicable",
+            "message": {
+              "text": "the test for rule noMixedContent was not applicable"
+            },
+            "properties": {
+              "actualValue": null,
+              "durationMs": 0,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "noMixedContent",
+            "ruleIndex": 23
+          },
+          {
+            "kind": "pass",
+            "message": {
+              "text": "the test for rule dnsSec was successful"
+            },
+            "properties": {
+              "actualValue": null,
+              "durationMs": 80,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "dnsSec",
+            "ruleIndex": 24
+          },
+          {
+            "kind": "fail",
+            "message": {
+              "text": "the test for rule hstsPreloaded failed"
+            },
+            "properties": {
+              "actualValue": {
+                "Strict-Transport-Security": ""
+              },
+              "durationMs": 0,
+              "errorIds": [
+                "missingPreload"
+              ],
+              "recommendationIds": []
+            },
+            "ruleId": "hstsPreloaded",
+            "ruleIndex": 25
+          },
+          {
+            "kind": "pass",
+            "message": {
+              "text": "the test for rule tlsv1_2 was successful"
+            },
+            "properties": {
+              "actualValue": null,
+              "durationMs": 351,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "tlsv1_2",
+            "ruleIndex": 26
+          },
+          {
+            "kind": "fail",
+            "message": {
+              "text": "the test for rule caa failed"
+            },
+            "properties": {
+              "actualValue": null,
+              "durationMs": 43,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "caa",
+            "ruleIndex": 27
+          },
+          {
+            "kind": "fail",
+            "message": {
+              "text": "the test for rule rpki failed"
+            },
+            "properties": {
+              "actualValue": [
+                {
+                  "isValid": false,
+                  "asn": 15133,
+                  "holder": "EDGECAST",
+                  "actual": "unknown",
+                  "prefix": "2606:2800:21f::/48"
+                },
+                {
+                  "isValid": false,
+                  "asn": 15133,
+                  "holder": "EDGECAST",
+                  "actual": "unknown",
+                  "prefix": "93.184.215.0/24"
+                }
+              ],
+              "durationMs": 175,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "rpki",
+            "ruleIndex": 28
+          },
+          {
+            "kind": "pass",
+            "message": {
+              "text": "the test for rule ipv6 was successful"
+            },
+            "properties": {
+              "actualValue": {
+                "addresses": [
+                  "2606:2800:21f:cb07:6820:80da:af6b:8b2c"
+                ]
+              },
+              "durationMs": 0,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "ipv6",
+            "ruleIndex": 29
+          },
+          {
+            "kind": "pass",
+            "message": {
+              "text": "the test for rule certificateTransparency was successful"
+            },
+            "properties": {
+              "actualValue": null,
+              "durationMs": 0,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "certificateTransparency",
+            "ruleIndex": 30
+          },
+          {
+            "kind": "fail",
+            "message": {
+              "text": "the test for rule http308 failed"
+            },
+            "properties": {
+              "actualValue": null,
+              "durationMs": 0,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "http308",
+            "ruleIndex": 31
+          },
+          {
+            "kind": "notApplicable",
+            "message": {
+              "text": "the test for rule dkim was not applicable"
+            },
+            "properties": {
+              "actualValue": null,
+              "durationMs": 108,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "dkim",
+            "ruleIndex": 32
+          },
+          {
+            "kind": "pass",
+            "message": {
+              "text": "the test for rule validCertificateChain was successful"
+            },
+            "properties": {
+              "actualValue": null,
+              "durationMs": 0,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "validCertificateChain",
+            "ruleIndex": 33
+          },
+          {
+            "kind": "fail",
+            "message": {
+              "text": "the test for rule contentSecurityPolicy failed"
+            },
+            "properties": {
+              "actualValue": {
+                "Content-Security-Policy": ""
+              },
+              "durationMs": 0,
+              "errorIds": [
+                "missingHeader"
+              ],
+              "recommendationIds": [
+                "missingDefaultSrcWithSelf",
+                "missingScriptSrc",
+                "missingStyleSrc",
+                "missingImgSrc"
+              ]
+            },
+            "ruleId": "contentSecurityPolicy",
+            "ruleIndex": 34
+          },
+          {
+            "kind": "pass",
+            "message": {
+              "text": "the test for rule tlsv1_3 was successful"
+            },
+            "properties": {
+              "actualValue": null,
+              "durationMs": 344,
+              "errorIds": [],
+              "recommendationIds": []
+            },
+            "ruleId": "tlsv1_3",
+            "ruleIndex": 35
+          }
+        ],
+        "tool": {
+          "driver": {
+            "name": "ozgsec-scanner",
+            "properties": {
+              "scannerIp": "80.80.80.80"
+            },
+            "rules": [
+              {
+                "fullDescription": {
+                  "text": "Checks if the certificate matches the hostname of the website."
+                },
+                "id": "matchesHostname",
+                "name": "Certificate matches hostname of the website"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the certificate is signed using a strong private key. A strong private key is a private RSA key with a bit length of at least 2048 or a DSA key."
+                },
+                "id": "strongPrivateKey",
+                "name": "Certificate is signed using a strong private key"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the website has X-Content-Type-Options enabled. The Value needs to be set to 'nosniff'."
+                },
+                "id": "contentTypeOptions",
+                "name": "X-Content-Type-Options"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the server responds to HTTP requests. If the server responds with a 5xx status code, the check is considered a failure."
+                },
+                "id": "http",
+                "name": "HTTP"
+              },
+              {
+                "fullDescription": {
+                  "text": "NOT IMPLEMENTED: Strong key exchange algorithms are used"
+                },
+                "id": "strongKeyExchange",
+                "name": "Strong key exchange"
+              },
+              {
+                "fullDescription": {
+                  "text": "Uses Heuristic to determine the language of the website. The check looks at the body and extracts the text content. It applies a language prediction model."
+                },
+                "id": "providesEnglishWebsiteVersion",
+                "name": "Provides English Website Version"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if all session cookies are secure and http only. The check inspects the Set-Cookie Header. If Expires attribute is set to 0, the cookie is NOT considered a session cookie."
+                },
+                "id": "secureSessionCookies",
+                "name": "Secure Session Cookies"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the website has X-Frame-Options enabled. DENY or SAMEORIGIN are both valid configuration. RFC7034 (https://www.rfc-editor.org/rfc/rfc7034)."
+                },
+                "id": "xFrameOptions",
+                "name": "X-Frame-Options"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the website has X-XSS-Protection enabled. Needs to have a value of 1 and the mode needs to be set to 'block'. RFC7034 (https://www.rfc-editor.org/rfc/rfc7034)."
+                },
+                "id": "xssProtection",
+                "name": "X-XSS-Protection"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks, if strong cipher suites are used during the TLS handshake. As Strong cipher suites we consider the recommended cipher suites from mozilla: https://wiki.mozilla.org/Security/Server_Side_TLS"
+                },
+                "id": "strongCipherSuites",
+                "name": "Strong cipher suites"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the target supports STARTTLS. STARTTLS is a way to take an existing insecure connection and upgrade it to a secure connection using SSL/TLS."
+                },
+                "id": "starttls",
+                "name": "STARTTLS"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the domain has a SPF record. RFC7208 (https://www.rfc-editor.org/rfc/rfc7208)."
+                },
+                "id": "spf",
+                "name": "SPF"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the domain has a DANE record. RFC6698 (https://www.rfc-editor.org/rfc/rfc6698)."
+                },
+                "id": "dane",
+                "name": "DANE"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the certificate is not revoked. The check is conform to RFC5280 (https://datatracker.ietf.org/doc/html/rfc5280#section-5.1.2.6)"
+                },
+                "id": "notRevoked",
+                "name": "Certificate is not revoked"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if Subresource Integrity (SRI) (https://www.w3.org/TR/SRI/) integrity is used on the webpage."
+                },
+                "id": "subResourceIntegrity",
+                "name": "Subresource Integrity"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks, if the file /.well-known/security.txt is present, served over https, is served as a text/plain file, and if it contains the required fields. The required fields are: Contact, Expires. The recommended fields are: Encryption, Canonical, Preferred-Languages. The file is also checked for a PGP signature."
+                },
+                "id": "responsibleDisclosure",
+                "name": "Responsible Disclosure"
+              },
+              {
+                "fullDescription": {
+                  "text": "Deprecated TLS protocols (TLSv1.0, TLSv1.1) are deactivated"
+                },
+                "id": "deprecatedTLSDeactivated",
+                "name": "Deprecated TLS deactivated"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the domain has a DMARC record. RFC7489 (https://www.rfc-editor.org/rfc/rfc7489)."
+                },
+                "id": "dmarc",
+                "name": "DMARC"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the certificate is not signed using a weak signature algorithm. The check is conform to https://developer.mozilla.org/en-US/docs/Web/Security/Weak_Signature_Algorithm"
+                },
+                "id": "strongSignatureAlgorithm",
+                "name": "Certificate is not signed using a weak signature algorithm"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the website is served over HTTPS. It will will follow redirects to HTTPS."
+                },
+                "id": "https",
+                "name": "HTTPS"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the website has HSTS enabled. Max-Age is required, includeSubDomains recommended. RFC6797 (https://www.rfc-editor.org/rfc/rfc6797)."
+                },
+                "id": "hsts",
+                "name": "HSTS"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks, if the website redirects to an https site, if an http request is send to it."
+                },
+                "id": "httpRedirectsToHttps",
+                "name": "HTTP redirects to HTTPS"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the certificate of a website is valid. A certificate is considered valid if it is not expired and if it is yet valid."
+                },
+                "id": "validCertificate",
+                "name": "Valid Certificate"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if there is mixed content on the webpage (https://developer.mozilla.org/en-US/docs/Web/Security/Mixed_content)."
+                },
+                "id": "noMixedContent",
+                "name": "No Mixed Content"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the domain supports DNSSEC. RFC9364 (https://www.rfc-editor.org/rfc/rfc9364)."
+                },
+                "id": "dnsSec",
+                "name": "DNSSEC"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the website HSTS-Header enabled preloading. RFC6797 (https://www.rfc-editor.org/rfc/rfc6797)."
+                },
+                "id": "hstsPreloaded",
+                "name": "HSTS Preloaded"
+              },
+              {
+                "fullDescription": {
+                  "text": "TLS 1.2 is supported"
+                },
+                "id": "tlsv1_2",
+                "name": "TLS 1.2 supported"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the domain supports CAA. RFC8659 (https://www.rfc-editor.org/rfc/rfc8659.html)."
+                },
+                "id": "caa",
+                "name": "CAA"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the target supports RPKI. If the target supports RPKI, it checks if the RPKI status is valid for all derived prefixes. If a domain has multiple IP addresses, the check is considered a success if all IP addresses have a valid RPKI status."
+                },
+                "id": "rpki",
+                "name": "RPKI"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the target supports IPv6 (AAAA record is present)."
+                },
+                "id": "ipv6",
+                "name": "IPv6"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the certificate uses certificate transparency. RFC6962 (https://www.rfc-editor.org/rfc/rfc6962) defines a certificate transparency log as a log which contains all certificates which are issued by a CA. This check does not check if the certificate is in the log, but if the certificate contains the certificate transparency extension, signed certificate timestamps or a OCSP Response."
+                },
+                "id": "certificateTransparency",
+                "name": "Certificate Transparency"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the server responds the HTTP-GET request with a 308 (Permanent Redirect) status code."
+                },
+                "id": "http308",
+                "name": "HTTP 308"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the domain has a DKIM record. RFC6376 (https://www.rfc-editor.org/rfc/rfc6376)."
+                },
+                "id": "dkim",
+                "name": "DKIM"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the certificate chain is valid. The check is conform to RFC5280 (https://datatracker.ietf.org/doc/html/rfc5280#section-6.1)"
+                },
+                "id": "validCertificateChain",
+                "name": "Signing-Chain of the certificate is valid"
+              },
+              {
+                "fullDescription": {
+                  "text": "Checks if the website has a Content Security Policy (CSP) enabled. The Check does not validate the configuration since there is no standard. The check adds recommendations if the default-src is not set to 'self' and if script-src, style-src or img-src are missing."
+                },
+                "id": "contentSecurityPolicy",
+                "name": "Content Security Policy"
+              },
+              {
+                "fullDescription": {
+                  "text": "TLS 1.3 is supported"
+                },
+                "id": "tlsv1_3",
+                "name": "TLS 1.3 supported"
+              }
+            ],
+            "version": ""
+          }
+        }
+      }
+    ],
+    "version": "2.1.0"
+  }
