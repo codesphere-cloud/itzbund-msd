@@ -187,7 +187,7 @@ const Content: FunctionComponent<Props> = (props) => {
     }));
     setCurrentDomainChangeCount((prev) => prev - 1);
     const response = await clientHttpClient(
-      `/api/v1/targets/delete`,
+      `/web-frontend/api/v1/targets/delete`,
       crypto.randomUUID(),
       {
         method: "POST",
@@ -316,7 +316,7 @@ const Content: FunctionComponent<Props> = (props) => {
     });
 
     const res = await clientHttpClient(
-      `/api/v1/collections/${collectionId}/targets`,
+      `/web-frontend/api/v1/collections/${collectionId}/targets`,
       crypto.randomUUID(),
       {
         method: "POST",

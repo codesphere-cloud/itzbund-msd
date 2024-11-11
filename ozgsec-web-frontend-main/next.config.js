@@ -2,6 +2,8 @@
 module.exports = {
     reactStrictMode: true,
     swcMinify: true,
+	assetPrefix: "/web-frontend",
+	generateEtags: true,
     webpack: (config, { isServer }) => {
         if (!isServer) {
             config.resolve.fallback.fs = false;

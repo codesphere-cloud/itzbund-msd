@@ -45,7 +45,7 @@ const IndexContent: FunctionComponent<Props> = ({ displayNotAvailable }) => {
           width={500}
           height={225}
           priority
-          src={"/assets/Adler_Ausschnitt_1.svg"}
+          src={"/web-frontend/assets/Adler_Ausschnitt_1.svg"}
           alt="OZG-Logo"
         />
         <div className="container relative z-10">

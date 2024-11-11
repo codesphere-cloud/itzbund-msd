@@ -1,0 +1,4 @@
+ozgsec-keycloak-main/build/**
+ozgsec-keycloak-main/build_keycloak/**
+ozgsec-keycloak-main/keycloak-26.0.5/**
+ozgsec-keycloak-main/node_modules/**
