@@ -9,8 +9,8 @@ fi
 latest_tag=$1
 
 keycloak_dir="./keycloak-${latest_tag}/themes"
-source_email="/home/user/app/azgsec-keycloak-main/build_keycloak/src/main/resources/themes/ozgsec-keycloak-theme/email"
-source_login="/home/user/app/azgsec-keycloak-main/build_keycloak/src/main/resources/themes/ozgsec-keycloak-theme/login"
+source_email="/home/user/app/ozgsec-keycloak-main/build_keycloak/src/main/resources/theme/ozgsec-keycloak-theme/email"
+source_login="/home/user/app/ozgsec-keycloak-main/build_keycloak/src/main/resources/theme/ozgsec-keycloak-theme/login"
 
 mkdir -p "$keycloak_dir"
 cp -r "$source_email" "$keycloak_dir"
