@@ -8,7 +8,7 @@ prepare:
     - name: Build Keycloak Theme
       command: cd ozgsec-keycloak-main/ && npm run keycloak
     - name: Install Keycloak
-      command: cd ozgsec-keycloak-main/ && chmod +x ./install.sh && ./install.sh
+      command: cd ozgsec-keycloak-main/ && source ./install-env.sh && bash ./install.sh
     - name: Install Frontend Dependencies
       command: cd ./ozgsec-web-frontend-main && npm install && npm install autoprefixer
     - name: Build Frontend
@@ -24,7 +24,7 @@ run:
     steps:
       - name: Start Frontend
         command: chmod +x ./start-fronten.sh &&d ./start-frontend.sh
-    plan: 10
+    plan: 9
     replicas: 1
     isPublic: true
     network:
@@ -33,7 +33,8 @@ run:
   keycloak:
     steps:
       - command: cd ozgsec-keycloak-main/ && bash ./keycloak-$(cat
-          ./KEYCLOAK_VERSION)/bin/kc.sh start --hostname
+          ./KEYCLOAK_VERSION)/bin/kc.sh --config-file
+          /home/user/app/ozgsec-keycloak-main/keycloak.conf start --hostname
           "https://$WORKSPACE_DEV_DOMAIN/keycloak" --http-port 3000
           --proxy-headers xforwarded --http-enabled true
     plan: 9
