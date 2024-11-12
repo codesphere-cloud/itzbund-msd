@@ -1,0 +1,29 @@
+schemaVersion: v0.2
+prepare:
+  steps:
+    - name: Install go
+      command: nix-env -iA nixpkgs.go
+    - name: Install rabbitmq
+      command: nix-env -iA nixpkgs.rabbitmq
+test:
+  steps: []
+run:
+  scanner:
+    steps:
+      - name: Run
+        command: cd ozgsec-best-practice-scanner-main && PORT=3000 make
+    plan: 9
+    replicas: 1
+    isPublic: true
+    network:
+      path: /scanner
+      stripPath: true
+  rabbitmq:
+    steps:
+      - command: source /home/user/app/rabbitmq/env.sh && rabbitmq-server
+    plan: 9
+    replicas: 1
+    isPublic: false
+    network:
+      path: /service-1
+      stripPath: true
