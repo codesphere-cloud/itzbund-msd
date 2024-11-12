@@ -16,7 +16,7 @@ const Footer: FunctionComponent = () => {
         <Image
           width={140}
           height={66}
-          src={"/assets/ozg-logo.svg"}
+          src={"/web-frontend/assets/ozg-logo.svg"}
           alt="OZG Logo"
         />
       </div>

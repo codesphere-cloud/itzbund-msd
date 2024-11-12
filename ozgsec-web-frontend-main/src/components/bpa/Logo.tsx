@@ -53,7 +53,7 @@ const Logo: FunctionComponent<Props> = (props) => {
           alt="Logo Adler"
           width={37 * factor}
           height={50 * factor}
-          src={"/assets/logo_eagle.svg"}
+          src={"/web-frontend/assets/logo_eagle.svg"}
         />
         <div className="transition-bund ml-2 relative">
           <Image
@@ -63,7 +63,7 @@ const Logo: FunctionComponent<Props> = (props) => {
             width={5.5 * factor}
             height={100 * factor}
             style={{ transform: scrolled ? "scaleY(0.367)" : "" }}
-            src={"/assets/logo_flag.svg"}
+            src={"/web-frontend/assets/logo_flag.svg"}
           />
         </div>
         <div style={{ width: 280 * factor }} className="absolute right-0">
@@ -74,7 +74,7 @@ const Logo: FunctionComponent<Props> = (props) => {
             style={{ opacity: scrolled ? 0 : 1 }}
             width={280 * factor}
             height={50 * factor}
-            src={"/assets/logo_text.svg"}
+            src={"/web-frontend/assets/logo_text.svg"}
           />
         </div>
       </div>

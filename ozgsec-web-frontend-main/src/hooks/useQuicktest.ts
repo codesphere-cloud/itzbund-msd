@@ -51,7 +51,7 @@ export function useQuicktest(code?: string | null) {
       // forward the secret of query param s to the backend
       try {
         const response = await clientHttpClient(
-          `/api/v2/scan?site=${encodeURIComponent(
+          `/web-frontend/api/v2/scan?site=${encodeURIComponent(
             target,
           )}&s=${code}&refresh=${query.get("refresh")}`,
           crypto.randomUUID(),
@@ -115,7 +115,7 @@ export function useQuicktest(code?: string | null) {
 
     try {
       const response = await clientHttpClient(
-        `/api/v2/scan?site=${encodeURIComponent(
+        `/web-frontend/api/v2/scan?site=${encodeURIComponent(
           report.runs[0].properties.target,
         )}&refresh=true&s=${code}`,
         crypto.randomUUID(),

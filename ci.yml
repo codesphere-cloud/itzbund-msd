@@ -1,6 +1,18 @@
 schemaVersion: v0.2
 prepare:
   steps:
+    - name: Update Node
+      command: sudo n lts
+    - name: Install node dependencies for building the Keycloak theme
+      command: cd ozgsec-keycloak-main/ && npm i
+    - name: Build Keycloak Theme
+      command: cd ozgsec-keycloak-main/ && npm run keycloak
+    - name: Install Keycloak
+      command: cd ozgsec-keycloak-main/ && chmod +x ./install.sh && ./install.sh
+    - name: Install Frontend Dependencies
+      command: cd ./ozgsec-web-frontend-main && npm install && npm install autoprefixer
+    - name: Build Frontend
+      command: cd ./ozgsec-web-frontend-main && npm run build
     - name: Install go
       command: nix-env -iA nixpkgs.go
     - name: Install rabbitmq
@@ -8,6 +20,28 @@ prepare:
 test:
   steps: []
 run:
+  web-frontend:
+    steps:
+      - name: Start Frontend
+        command: chmod +x ./start-frontend.sh && ./start-frontend.sh
+    plan: 10
+    replicas: 1
+    isPublic: true
+    network:
+      path: /web-frontend
+      stripPath: true
+  keycloak:
+    steps:
+      - command: cd ozgsec-keycloak-main/ && bash ./keycloak-$(cat
+          ./KEYCLOAK_VERSION)/bin/kc.sh start --hostname
+          "https://$WORKSPACE_DEV_DOMAIN/keycloak" --http-port 3000
+          --proxy-headers xforwarded --http-enabled true
+    plan: 9
+    replicas: 1
+    isPublic: true
+    network:
+      path: /keycloak
+      stripPath: true
   scanner:
     steps:
       - name: Run
@@ -16,6 +50,7 @@ run:
     replicas: 1
     isPublic: true
     network:
+      path: /keycloak
       path: /scanner
       stripPath: true
   rabbitmq:

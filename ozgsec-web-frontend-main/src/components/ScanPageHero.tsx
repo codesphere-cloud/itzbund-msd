@@ -45,7 +45,7 @@ const ScanPageHero: FunctionComponent<Props> = ({
             width={200}
             height={200}
             priority
-            src={"/assets/sticker_challenge_white.svg"}
+            src={"/web-frontend/assets/sticker_challenge_white.svg"}
             alt="OZG-Logo"
             className="block sm:inline-block sm:mx-0 mx-auto"
           />
