@@ -1,6 +1,6 @@
 {
     "name": "ozgsec-keycloak-theme",
-    "homepage": "https://61680-3000.2.codesphere.com/keycloak",
+    "homepage": "https://gitlab.opencode.de/bmi/ozg-rahmenarchitektur/ozgsec/ozgsec-keycloak",
     "version": "2.1.6",
     "description": "A custom theme for Keycloak",
     "repository": {
