@@ -50,7 +50,6 @@ run:
     replicas: 1
     isPublic: true
     network:
-      path: /keycloak
       path: /scanner
       stripPath: true
   rabbitmq:
