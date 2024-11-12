@@ -480,9 +480,13 @@ func main() {
 
 	http.Handle("/", http.HandlerFunc(handlerFactory(sarifTransformer, scanner, monitor)))
 
-	slog.Info("starting http server on port 8080")
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	slog.Info(fmt.Sprintf("starting http server on port %s", port))
 	server := &http.Server{
-		Addr:              ":8080",
+		Addr:              fmt.Sprintf(":%s", port),
 		ReadHeaderTimeout: 3 * time.Second,
 	}
 
