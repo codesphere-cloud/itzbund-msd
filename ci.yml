@@ -23,7 +23,7 @@ run:
   web-frontend:
     steps:
       - name: Start Frontend
-        command: chmod +x ./start-frontend.sh && ./start-frontend.sh
+        command: chmod +x ./start-fronten.sh &&d ./start-frontend.sh
     plan: 10
     replicas: 1
     isPublic: true
