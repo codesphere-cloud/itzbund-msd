@@ -13,10 +13,14 @@ prepare:
       command: cd ./ozgsec-web-frontend-main && npm install && npm install autoprefixer
     - name: Build Frontend
       command: cd ./ozgsec-web-frontend-main && npm run build
+    - name: Install go
+      command: nix-env -iA nixpkgs.go
+    - name: Install rabbitmq
+      command: nix-env -iA nixpkgs.rabbitmq
 test:
   steps: []
 run:
-  service-1:
+  web-frontend:
     steps:
       - name: Start Frontend
         command: chmod +x ./start-frontend.sh && ./start-frontend.sh
@@ -37,4 +41,24 @@ run:
     isPublic: true
     network:
       path: /keycloak
+      stripPath: true
+  scanner:
+    steps:
+      - name: Run
+        command: cd ozgsec-best-practice-scanner-main && PORT=3000 make
+    plan: 9
+    replicas: 1
+    isPublic: true
+    network:
+      path: /keycloak
+      path: /scanner
+      stripPath: true
+  rabbitmq:
+    steps:
+      - command: source /home/user/app/rabbitmq/env.sh && rabbitmq-server
+    plan: 9
+    replicas: 1
+    isPublic: false
+    network:
+      path: /service-1
       stripPath: true
